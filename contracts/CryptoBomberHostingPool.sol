@@ -59,8 +59,8 @@ contract CryptoBomberHostingPool is Ownable{
         IERC20(token).approve(pool, amount);
     }
 
-    function approveNFTPool(address token, address pool, bool approved) public onlyOwner {
-        IERC1155(token).setApprovalForAll(pool, approved);
+    function approveNFTPool(address nft, address pool, bool approved) public onlyOwner {
+        IERC1155(nft).setApprovalForAll(pool, approved);
     }
 
     function sendGas(address to, uint256 amount) public onlySend {
