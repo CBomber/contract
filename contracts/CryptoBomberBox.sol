@@ -238,21 +238,11 @@ contract CryptoBomberBox is Ownable, Pausable{
     }
 
     function initNeedOpenBoxGas() internal {
-        needOpenBoxGas[1] = 0.004 ether;
-        needOpenBoxGas[2] = 0.008 ether;
-        needOpenBoxGas[3] = 0.012 ether;
-        needOpenBoxGas[4] = 0.016 ether;
-        needOpenBoxGas[5] = 0.02 ether;
-        needOpenBoxGas[6] = 0.024 ether;
+        
     }
 
     function initBoxContainTokenNums() internal {
-        boxContainTokenNums[1] = [1 ether,2 ether,3 ether];
-        boxContainTokenNums[2] = [3 ether,4 ether,5 ether];
-        boxContainTokenNums[3] = [5 ether,6 ether,7 ether];
-        boxContainTokenNums[4] = [7 ether,8 ether,9 ether];
-        boxContainTokenNums[5] = [9 ether,10 ether,11 ether];
-        boxContainTokenNums[6] = [11 ether,12 ether,13 ether];
+        
     }
 
     function initBoxRatio() internal{
