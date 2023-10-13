@@ -245,6 +245,10 @@ contract CryptoBomberBox is Ownable, Pausable{
         
     }
 
+    function initPositionContainTokenIDs() internal {
+        
+    }
+
     function initBoxRatio() internal{
         boxRatio[1] = 50;
         boxRatio[2] = 100;
