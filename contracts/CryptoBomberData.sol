@@ -75,7 +75,6 @@ contract CryptoBomberData is Ownable{
     }
 
     mapping (address => bool) private systemUser;
-    mapping (address => bool) private gameDaoUser;
     mapping (address => userInfo) private userInfoMap;
     mapping(uint256 => address) private codes;
 
