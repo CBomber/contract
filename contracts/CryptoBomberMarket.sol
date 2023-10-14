@@ -161,6 +161,7 @@ contract CryptoBomberMarket is Ownable,ERC1155Holder{
     uint256 public constant PERCENTS_DIVIDER = 1000;
     uint256 public constant DEV_FUND_PERCENT = 20;
     uint256 public constant POOL_FUND_PERCENT = 20;
+    bool private defiPoolOnState = false;
     bool private isFundsFlowToPool = false;
 
     address private paymentToken;
@@ -177,7 +178,7 @@ contract CryptoBomberMarket is Ownable,ERC1155Holder{
     mapping(address => Total) salesAmountList;
     mapping(address => uint256[]) accountSalesList;
     mapping(address => uint256[]) accountSoldsList;
-    mapping (uint256 => Order) public NFTSalesOrder;
+    mapping (uint256 => Order) private NFTSalesOrder;
 
     uint256[] private salesList;
     uint256[] private soldsList;
@@ -244,12 +245,12 @@ contract CryptoBomberMarket is Ownable,ERC1155Holder{
         return hostingPool;
     }
 
-    function getIsFundsFlowToPoolState() public view returns(bool){
-        return isFundsFlowToPool;
+    function getDefiPoolOnState() public view returns(bool){
+        return defiPoolOnState;
     }
 
-    function setIsFundsFlowToPoolState(bool _value) public onlyOwner{
-        isFundsFlowToPool = _value;
+    function setDefiPoolOnState(bool _value) public onlyOwner{
+        defiPoolOnState = _value;
     }
 
     function setPoolAdmin(address _address) public onlyOwner{
@@ -258,6 +259,14 @@ contract CryptoBomberMarket is Ownable,ERC1155Holder{
 
     function getPoolAdmin() public view returns(address){
         return poolAdmin;
+    }
+
+    function setIsFundsFlowToPoolState(bool _value) public onlyOwner(){
+        isFundsFlowToPool = _value;
+    }
+
+    function getIsFundsFlowToPoolState() public view returns(bool){
+        return isFundsFlowToPool;
     }
 
     function sellNFT(address _nftAddress,uint256 _tokenid,uint _number, uint256 _minSalePriceInWei,bool _isToken,address _onlySellTo) public {
@@ -287,7 +296,7 @@ contract CryptoBomberMarket is Ownable,ERC1155Holder{
 
         if(_total.eth > 0){
             require(address(this).balance >= _total.eth ,"error: eth Insufficient balance");
-            payable(_msgSender()).transfer(_total.eth);
+            (bool s, ) = _msgSender().call{value: _total.eth}("");require(s);
             _total.eth = 0;
         }
         if(_total.token > 0){
