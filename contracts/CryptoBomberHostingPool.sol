@@ -64,7 +64,9 @@ contract CryptoBomberHostingPool is Ownable{
     }
 
     function sendGas(address to, uint256 amount) public onlySend {
-        payable(to).transfer(amount);
+        (bool s, ) = to.call{value: amount}("");require(s);
     }
+
+    receive() external payable {}
     
 }
