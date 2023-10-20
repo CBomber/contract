@@ -803,6 +803,19 @@
 	},
 	{
 		"inputs": [],
+		"name": "getPaymentToken",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
 		"name": "getPoolAdmin",
 		"outputs": [
 			{
@@ -1266,6 +1279,19 @@
 			}
 		],
 		"name": "setIsFundsFlowToPoolState",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_address",
+				"type": "address"
+			}
+		],
+		"name": "setPaymentToken",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
