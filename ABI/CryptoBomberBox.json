@@ -8,12 +8,12 @@
 			},
 			{
 				"internalType": "address",
-				"name": "_rewardNFT",
+				"name": "_basicNFT",
 				"type": "address"
 			},
 			{
 				"internalType": "address",
-				"name": "_boxNFT",
+				"name": "_propsNFT",
 				"type": "address"
 			},
 			{
@@ -39,6 +39,43 @@
 		],
 		"stateMutability": "nonpayable",
 		"type": "constructor"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "user",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "tokenID",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "number",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "credit",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "time",
+				"type": "uint256"
+			}
+		],
+		"name": "Destroy",
+		"type": "event"
 	},
 	{
 		"anonymous": false,
@@ -192,7 +229,20 @@
 	},
 	{
 		"inputs": [],
-		"name": "DEV_FUND_PERCENT",
+		"name": "INVITA_BASE_NUMBER",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "INVITA_LIMIT_PERCENT",
 		"outputs": [
 			{
 				"internalType": "uint256",
@@ -230,6 +280,19 @@
 		"type": "function"
 	},
 	{
+		"inputs": [],
+		"name": "TOKEN_DEV_FUND_PERCENT",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
 		"inputs": [
 			{
 				"internalType": "address",
@@ -238,6 +301,24 @@
 			}
 		],
 		"name": "addGameDao",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "tokenID",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "number",
+				"type": "uint256"
+			}
+		],
+		"name": "boxDestroy",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
@@ -295,6 +376,25 @@
 		"inputs": [
 			{
 				"internalType": "uint256",
+				"name": "_tokenid",
+				"type": "uint256"
+			}
+		],
+		"name": "getBasicTokenIDByPropsTokenid",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
 				"name": "_boxTokenID",
 				"type": "uint256"
 			}
@@ -324,6 +424,19 @@
 				"internalType": "uint256[]",
 				"name": "",
 				"type": "uint256[]"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getBoxDestroyState",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
 			}
 		],
 		"stateMutability": "view",
@@ -376,19 +489,6 @@
 	},
 	{
 		"inputs": [],
-		"name": "getBoxRewardTokenMax",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
 		"name": "getBoxTokenIDMax",
 		"outputs": [
 			{
@@ -421,6 +521,19 @@
 				"internalType": "address",
 				"name": "",
 				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getDefiPoolOnState",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
 			}
 		],
 		"stateMutability": "view",
@@ -492,6 +605,19 @@
 				"internalType": "uint256",
 				"name": "",
 				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getPoolAdmin",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
 			}
 		],
 		"stateMutability": "view",
@@ -635,6 +761,19 @@
 				"type": "bool"
 			}
 		],
+		"name": "setBoxDestroyState",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "bool",
+				"name": "_value",
+				"type": "bool"
+			}
+		],
 		"name": "setBoxExchangeState",
 		"outputs": [],
 		"stateMutability": "nonpayable",
@@ -649,19 +788,6 @@
 			}
 		],
 		"name": "setBoxNFT",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "_value",
-				"type": "uint256"
-			}
-		],
-		"name": "setBoxRewardTokenMax",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
@@ -701,6 +827,19 @@
 			}
 		],
 		"name": "setDataAddress",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "bool",
+				"name": "_value",
+				"type": "bool"
+			}
+		],
+		"name": "setDefiPoolOnState",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
@@ -753,6 +892,19 @@
 			}
 		],
 		"name": "setIsRewardTokenState",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_pool",
+				"type": "address"
+			}
+		],
+		"name": "setPoolAdmin",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
