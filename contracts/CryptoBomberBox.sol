@@ -477,7 +477,7 @@ contract CryptoBomberBox is Ownable, Pausable{
     }
 
     function getNeedOpenBoxGas(uint256 _boxTokenID) public view returns(uint256){
-        return needOpenBoxUsd[_boxTokenID] * (1.01 ether) / (uint256(getChainlinkDataFeedLatestAnswer()));
+        return needOpenBoxUsd[_boxTokenID] * (1 ether) / (uint256(getChainlinkDataFeedLatestAnswer()));
     }
 
     function setDataFeedAddress(address _adderss) public onlyOwner {
