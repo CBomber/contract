@@ -152,6 +152,23 @@ interface  IPoolAdmin {
     function sendGas(uint256 value) external;
 }
 
+interface AggregatorV3Interface {
+    function decimals() external view returns (uint8);
+
+    function description() external view returns (string memory);
+
+    function version() external view returns (uint256);
+
+    function getRoundData(
+        uint80 _roundId
+    ) external view returns (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound);
+
+    function latestRoundData()
+        external
+        view
+    returns (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound);
+}
+
 library Address {
     function isContract(address account) internal view returns (bool) {
         uint256 size;
@@ -164,6 +181,7 @@ contract CryptoBomberBox is Ownable, Pausable{
 
     using SafeMath for uint256;
     using Address for address;
+    AggregatorV3Interface internal dataFeed;
 
     address private rewardNFT;
     address private boxNFT;
@@ -185,6 +203,7 @@ contract CryptoBomberBox is Ownable, Pausable{
 
     uint256 private upgradeNumber = 2;
     uint256 private boxTokenIDMax = 6;
+    uint256 private totalBoxOpened = 0;
 
     bool private isBoxUpgradeState = false;
     bool private isBoxExchangeState = false;
@@ -193,10 +212,10 @@ contract CryptoBomberBox is Ownable, Pausable{
     mapping (uint256 => uint256[]) positionContainTokenIDs;
     mapping (uint256 => uint256[]) boxContainPositions;
     mapping (uint256 => uint256[]) boxContainTokenNums;
-    mapping (uint256 => uint256) needOpenBoxGas;
+    mapping (uint256 => uint256) needOpenBoxUsd;
     mapping(uint256 => uint256) boxRatio;
 
-    event Open(address user,uint256 rewardType,address contractorAddress,uint256 tokenid,uint256 number,uint256 time);
+    event Open(address user,uint256 rewardType,address contractorAddress,uint256 tokenid,uint256 number,uint256 boxID,uint256 time);
     event Upgrade(address user,uint256 tokenID,uint256 number,uint256 time);
     event Exchange(address user,uint256 tokenID,uint256 number,uint256 time);
     event Destroy(address user,uint256 tokenID,uint256 number,uint256 credit,uint256 time);
@@ -212,9 +231,12 @@ contract CryptoBomberBox is Ownable, Pausable{
 
         pause();
 
-        initNeedOpenBoxGas();
+        initNeedOpenBoxUsd();
         initBoxContainPositions();
         initBoxRatio();
+
+        dataFeed = AggregatorV3Interface(0xD4a33860578De61DBAbDc8BFdb98FD742fA7028e);//Goerli Testnet,eth usd
+
     }
 
     modifier onlyGameDao() {
@@ -243,23 +265,22 @@ contract CryptoBomberBox is Ownable, Pausable{
         boxContainPositions[6] = [15,16,17];
     }
 
-    function initNeedOpenBoxGas() internal {
-        needOpenBoxGas[1] = 10 ether;
-        needOpenBoxGas[2] = 20 ether;
-        needOpenBoxGas[3] = 30 ether;
-        needOpenBoxGas[4] = 40 ether;
-        needOpenBoxGas[5] = 50 ether;
-        needOpenBoxGas[6] = 60 ether;
+    function initNeedOpenBoxUsd() internal {
+        needOpenBoxUsd[1] = 100000000;
+        needOpenBoxUsd[2] = 196000000;
+        needOpenBoxUsd[3] = 288000000;
+        needOpenBoxUsd[4] = 376000000;
+        needOpenBoxUsd[5] = 460000000;
+        needOpenBoxUsd[6] = 540000000;
     }
-
 
     function initBoxRatio() internal{
         boxRatio[1] = 50;
-        boxRatio[2] = 100;
-        boxRatio[3] = 150;
-        boxRatio[4] = 200;
-        boxRatio[5] = 250;
-        boxRatio[6] = 300;
+        boxRatio[2] = 102;
+        boxRatio[3] = 156;
+        boxRatio[4] = 212;
+        boxRatio[5] = 260;
+        boxRatio[6] = 330;
     }
 
     function getRewardToken() public view returns(address){
@@ -422,13 +443,40 @@ contract CryptoBomberBox is Ownable, Pausable{
         return boxRatio[_tokenid];
     }
 
-    function updateNeedOpenBoxGas(uint256 _boxTokenID,uint256 _value) public onlyOwner{
-        needOpenBoxGas[_boxTokenID] = _value;
+    function updateNeedOpenBoxUsd(uint256 _boxTokenID,uint256 _value) public onlyOwner{
+        needOpenBoxUsd[_boxTokenID] = _value;
+    }
+
+    function getNeedOpenBoxUsd(uint256 _boxTokenID) public view returns(uint256){
+        return needOpenBoxUsd[_boxTokenID];
+    }
+
+    /**
+     * Returns the latest answer.
+     */
+    function getChainlinkDataFeedLatestAnswer() public view returns (int) {
+        // prettier-ignore
+        (
+            /* uint80 roundID */,
+            int answer,
+            /*uint startedAt*/,
+            /*uint timeStamp*/,
+            /*uint80 answeredInRound*/
+        ) = dataFeed.latestRoundData();
+        return answer;
     }
 
     function getNeedOpenBoxGas(uint256 _boxTokenID) public view returns(uint256){
-        return needOpenBoxGas[_boxTokenID];
-    } 
+        return needOpenBoxUsd[_boxTokenID] * (1.01 ether) / (uint256(getChainlinkDataFeedLatestAnswer()));
+    }
+
+    function setDataFeedAddress(address _adderss) public onlyOwner {
+        dataFeed = AggregatorV3Interface(_adderss);
+    }
+
+    function getTotalBoxOpened() public view returns(uint256){
+        return totalBoxOpened;
+    }
 
     function executeRewardToken(uint256 tokenID) internal {
 
@@ -440,7 +488,7 @@ contract CryptoBomberBox is Ownable, Pausable{
         IERC20(rewardToken).transferFrom(hostingPool, msg.sender, tokenNum);
         IERC20(rewardToken).transferFrom(hostingPool, devFundAddress, tokenNum.mul(TOKEN_DEV_FUND_PERCENT).div(PERCENTS_DIVIDER));
 
-        emit Open(_msgSender(),0,rewardToken,0,tokenNum,block.timestamp);
+        emit Open(_msgSender(),0,rewardToken,0,tokenNum,tokenID,block.timestamp);
     }
 
     function executeRewardNFT(uint256 tokenID) internal{
@@ -451,11 +499,39 @@ contract CryptoBomberBox is Ownable, Pausable{
         uint256 tokenid = tokenids[tokenidIndex];
         IERC1155(rewardNFT).mint(_msgSender(), tokenid, 1, '0x0');
 
-        emit Open(_msgSender(),1,rewardNFT,tokenid,1,block.timestamp);
+        emit Open(_msgSender(),1,rewardNFT,tokenid,1,tokenID,block.timestamp);
     }
 
     function boxOpen(uint256 tokenID) public payable whenNotPaused{
-        ///
+        require(!_msgSender().isContract(),'error: Requestor is the contractual address');
+        require(msg.value >= getNeedOpenBoxGas(tokenID),'error: Insufficient transmission of gas value');
+        require(IERC1155(boxNFT).balanceOf(_msgSender(), tokenID) > 0 ,'error: Box balance is low');
+
+        totalBoxOpened ++;
+
+        IERC1155(boxNFT).burn(_msgSender(), tokenID,1);
+        if(isRewardToken){
+            uint256 rewardType = random(2);
+            if(rewardType == 0){
+                executeRewardToken(tokenID);
+            }else{
+                executeRewardNFT(tokenID);
+            }
+        }else{
+            executeRewardNFT(tokenID);
+        }
+
+        if(isFundsFlowToPool){
+            uint256 poolGasValue = msg.value.mul(POOL_FUND_PERCENT).div(PERCENTS_DIVIDER);
+            uint256 devfundGasValue = msg.value.sub(poolGasValue);
+            (bool s, ) = hostingPool.call{value: poolGasValue}("");require(s);
+            (bool s1, ) = devFundAddress.call{value: devfundGasValue}("");require(s1);
+            if(defiPoolOnState){
+                IPoolAdmin(poolAdmin).sendGas(poolGasValue);
+            }
+        }else{
+            (bool s, ) = devFundAddress.call{value: msg.value}("");require(s);
+        }
     }
 
     function boxUpgrade(uint256 tokenID,uint256 number) public whenNotPaused{
@@ -511,13 +587,12 @@ contract CryptoBomberBox is Ownable, Pausable{
         emit Destroy(_msgSender(),tokenID,number,boxRatio[tokenID].mul(number).mul(2),block.timestamp);
     }
 
-
     function random(uint number) internal view returns(uint256) {
         return uint256(keccak256(abi.encodePacked(block.timestamp,
         block.difficulty,
         block.number,
         block.gaslimit,
+        totalBoxOpened,
         msg.sender))) % number;
     }
-
 }
