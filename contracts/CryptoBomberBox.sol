@@ -490,26 +490,12 @@ contract CryptoBomberBox is Ownable, Pausable{
 
     function executeRewardToken(uint256 tokenID) internal {
 
-        uint256[] memory tokenNums = boxContainTokenNums[tokenID];
-        uint256 tokenNumIndex = random(tokenNums.length);
-        uint256 tokenNum = tokenNums[tokenNumIndex];
-        uint256 invitaRewardRatio = IData(data).invitation(_msgSender()).div(INVITA_BASE_NUMBER) > INVITA_LIMIT_PERCENT ? INVITA_LIMIT_PERCENT : IData(data).invitation(_msgSender()).div(INVITA_BASE_NUMBER);
-        tokenNum = tokenNum.mul(invitaRewardRatio).div(PERCENTS_DIVIDER).add(tokenNum);
-        IERC20(rewardToken).transferFrom(hostingPool, msg.sender, tokenNum);
-        IERC20(rewardToken).transferFrom(hostingPool, devFundAddress, tokenNum.mul(TOKEN_DEV_FUND_PERCENT).div(PERCENTS_DIVIDER));
-
-        emit Open(_msgSender(),0,rewardToken,0,tokenNum,tokenID,block.timestamp);
+        //it's not public.
     }
 
     function executeRewardNFT(uint256 tokenID) internal{
-        uint256[] memory positions = boxContainPositions[tokenID];
-        uint256 positionIndex = random(positions.length);
-        uint256[] memory tokenids = positionContainTokenIDs[positions[positionIndex]];
-        uint256 tokenidIndex = random(tokenids.length);
-        uint256 tokenid = tokenids[tokenidIndex];
-        IERC1155(rewardNFT).mint(_msgSender(), tokenid, 1, '0x0');
 
-        emit Open(_msgSender(),1,rewardNFT,tokenid,1,tokenID,block.timestamp);
+        //it's not public.
     }
 
     function boxOpen(uint256 tokenID) public payable whenNotPaused{
