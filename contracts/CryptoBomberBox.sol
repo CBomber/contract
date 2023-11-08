@@ -234,8 +234,9 @@ contract CryptoBomberBox is Ownable, Pausable{
         initNeedOpenBoxUsd();
         initBoxContainPositions();
         initBoxRatio();
+        initBoxContainTokenNums();
 
-        dataFeed = AggregatorV3Interface(0xD4a33860578De61DBAbDc8BFdb98FD742fA7028e);//Goerli Testnet,eth usd
+        dataFeed = AggregatorV3Interface(0xD4a33860578De61DBAbDc8BFdb98FD742fA7028e);//Goerli Testnet,eth - usd
 
     }
 
@@ -272,6 +273,15 @@ contract CryptoBomberBox is Ownable, Pausable{
         needOpenBoxUsd[4] = 376000000;
         needOpenBoxUsd[5] = 460000000;
         needOpenBoxUsd[6] = 540000000;
+    }
+
+    function initBoxContainTokenNums() internal {
+        boxContainTokenNums[1] = [1 ether,2 ether,3 ether];
+        boxContainTokenNums[2] = [3 ether,4 ether,5 ether];
+        boxContainTokenNums[3] = [5 ether,6 ether,7 ether];
+        boxContainTokenNums[4] = [7 ether,8 ether,9 ether];
+        boxContainTokenNums[5] = [9 ether,10 ether,11 ether];
+        boxContainTokenNums[6] = [11 ether,12 ether,13 ether];
     }
 
     function initBoxRatio() internal{
