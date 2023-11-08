@@ -271,12 +271,12 @@ contract CryptoBomberMarket is Ownable,ERC1155Holder{
 
     function sellNFT(address _nftAddress,uint256 _tokenid,uint _number, uint256 _minSalePriceInWei,bool _isToken,address _onlySellTo) public {
 
+        //it's not public.
         
-
     }
    
     function cancelSalesOrder(uint256 _index) public {
-        
+        //it's not public.
     }
 
     function deleteElement(uint256[] storage dataArray,uint256 index) internal {
@@ -287,8 +287,8 @@ contract CryptoBomberMarket is Ownable,ERC1155Holder{
 
     function buyNFT(uint256 _index) public payable {
 
+        //it's not public.
         
-
     }
 
     function withdraw() public{
