@@ -518,7 +518,7 @@ contract CryptoBomberBasic is ERC1155,Ownable{
         _;
     }
     
-   constructor() ERC1155("http://cdn.cbomber.io/api/basic/") 
+   constructor() ERC1155("https://cbomber.io/api/basic/") 
     {
         name = "CryptoBomber Basic NFT";
         symbol = "CBBN";
@@ -534,6 +534,10 @@ contract CryptoBomberBasic is ERC1155,Ownable{
 
     function removeMinter(address account) public onlyOwner{
         minterUser[account] = false;
+    }
+
+    function setURI(string memory _url) public onlyOwner{
+        _setURI(_url);
     }
 
     function mint(address account, uint256 id, uint256 amount, bytes memory data)
