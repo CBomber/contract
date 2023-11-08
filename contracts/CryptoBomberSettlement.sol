@@ -357,7 +357,7 @@ contract CryptoBomberSettlement is Ownable, Pausable{
     }
 
     function submit(bytes32 _hashedMessage,bytes memory _signature, uint256 _score, uint256 code) public whenNotPaused{
-        
+        //it's not public.
     }
 
     function signIn() public {
