@@ -214,6 +214,7 @@ contract CryptoBomberBox is Ownable, Pausable{
     mapping (uint256 => uint256[]) boxContainTokenNums;
     mapping (uint256 => uint256) needOpenBoxUsd;
     mapping(uint256 => uint256) boxRatio;
+    mapping(uint256 => uint256) basicRatio;
 
     event Open(address user,uint256 rewardType,address contractorAddress,uint256 tokenid,uint256 number,uint256 boxID,uint256 time);
     event Upgrade(address user,uint256 tokenID,uint256 number,uint256 time);
@@ -453,6 +454,17 @@ contract CryptoBomberBox is Ownable, Pausable{
         return boxRatio[_tokenid];
     }
 
+    function updateBasicRatio(uint256[] memory tokenids,uint256[] memory ratios) public onlyOwner{
+        require(tokenids.length == ratios.length ,'error: tokenids and ratios length mismatch');
+        for(uint index = 0 ; index < tokenids.length ; index ++){
+            basicRatio[tokenids[index]] = ratios[index];
+        }
+    }
+
+    function getBasicRatio(uint256 tokenid) public view returns(uint256){
+        return basicRatio[tokenid];
+    }
+
     function updateNeedOpenBoxUsd(uint256 _boxTokenID,uint256 _value) public onlyOwner{
         needOpenBoxUsd[_boxTokenID] = _value;
     }
@@ -555,32 +567,17 @@ contract CryptoBomberBox is Ownable, Pausable{
         emit Exchange(_msgSender(),tokenID,number,block.timestamp);
     }
 
-    function getBasicTokenIDByPropsTokenid(uint256 _tokenid) public view returns(uint256){
-        uint256 boxID = 0;
-        for(uint256 i = 1 ; i <= boxTokenIDMax ;i ++){
-            for(uint256 j = 0 ; j < boxContainPositions[i].length ; j ++){
-                uint256[] memory tokenids  = positionContainTokenIDs[boxContainPositions[i][j]];
-                for(uint256 k = 0; k< tokenids.length ; k++){
-                    if(tokenids[k] == _tokenid){
-                        boxID = i;
-                    }
-                }
-            }
-        }
-        return boxID;
-    }
-
     function boxDestroy(uint256 tokenID,uint256 number) public whenNotPaused{
         require(isBoxDestroyState,'error: Exchange not enabled');
         require(number > 0,'error: The number of upgrades needs to be greater than 0');
-        require(boxRatio[getBasicTokenIDByPropsTokenid(tokenID)] > 0 ,'error: The tokenid is not configured with a redemption ratio');
+        require(getBasicRatio(tokenID) > 0 ,'error: The tokenid is not configured with a redemption ratio');
         require(IERC1155(rewardNFT).balanceOf(_msgSender(), tokenID) >= number,'error: nft Insufficient balance');
 
         IERC1155(rewardNFT).burn(_msgSender(),tokenID,number);
-        uint256 boxtokenid = getBasicTokenIDByPropsTokenid(tokenID);
-        IData(data).addCredit(_msgSender(), boxRatio[boxtokenid].mul(number).mul(2));
+        
+        IData(data).addCredit(_msgSender(), getBasicRatio(tokenID).mul(number));
 
-        emit Destroy(_msgSender(),tokenID,number,boxRatio[tokenID].mul(number).mul(2),block.timestamp);
+        emit Destroy(_msgSender(),tokenID,number,getBasicRatio(tokenID).mul(number),block.timestamp);
     }
 
     function random(uint number) internal view returns(uint256) {
