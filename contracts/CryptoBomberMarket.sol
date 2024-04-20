@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 // https://cbomber.io
-// CryptoBomberMarket
+// CBomberMarket
 pragma solidity ^0.8.8;
 
 library SafeMath {
@@ -154,20 +154,16 @@ abstract contract ERC1155Holder is ERC165, IERC1155Receiver {
     }
 }
 
-contract CryptoBomberMarket is Ownable,ERC1155Holder{
+contract CBomberMarket is Ownable,ERC1155Holder{
 
     using SafeMath for uint256;
 
     uint256 public constant PERCENTS_DIVIDER = 1000;
     uint256 public constant DEV_FUND_PERCENT = 20;
     uint256 public constant POOL_FUND_PERCENT = 20;
-    bool private defiPoolOnState = false;
-    bool private isFundsFlowToPool = false;
 
     address private paymentToken;
     address private devFundAddress;
-    address private hostingPool;
-    address private poolAdmin;
 
     struct Total{
         uint256 token;
@@ -202,11 +198,9 @@ contract CryptoBomberMarket is Ownable,ERC1155Holder{
     event BuyNFT(uint256 _index,address account,uint256 time);
     event Withdraw(address account,uint256 ethValue,uint256 tokenValue,uint256 time);
 
-    constructor (address _token,address _devFundAddress,address _hostingPool,address _poolAdmin) {
+    constructor (address _token,address _devFundAddress) {
         paymentToken = _token;
         devFundAddress = _devFundAddress;
-        hostingPool = _hostingPool;
-        poolAdmin = _poolAdmin;
     }
 
     function getNextIndexToAssign() public view returns (uint256) {
@@ -219,6 +213,14 @@ contract CryptoBomberMarket is Ownable,ERC1155Holder{
 
     function _incrementIndexToAssign() internal {
         _indexToAssign ++;
+    }
+
+    function getPaymentToken() public view returns(address){
+        return paymentToken;
+    }
+
+    function setPaymentToken(address _address) public onlyOwner{
+        paymentToken = _address;
     }
 
     function addNFTContract(address _nftAddress) public onlyOwner {
@@ -237,46 +239,15 @@ contract CryptoBomberMarket is Ownable,ERC1155Holder{
         return devFundAddress;
     }
 
-    function setHostingPool(address _address) public onlyOwner{
-        hostingPool = _address;
-    }
-
-    function getHostingPool() public view returns(address){
-        return hostingPool;
-    }
-
-    function getDefiPoolOnState() public view returns(bool){
-        return defiPoolOnState;
-    }
-
-    function setDefiPoolOnState(bool _value) public onlyOwner{
-        defiPoolOnState = _value;
-    }
-
-    function setPoolAdmin(address _address) public onlyOwner{
-        poolAdmin = _address;
-    }
-
-    function getPoolAdmin() public view returns(address){
-        return poolAdmin;
-    }
-
-    function setIsFundsFlowToPoolState(bool _value) public onlyOwner(){
-        isFundsFlowToPool = _value;
-    }
-
-    function getIsFundsFlowToPoolState() public view returns(bool){
-        return isFundsFlowToPool;
-    }
-
+    
     function sellNFT(address _nftAddress,uint256 _tokenid,uint _number, uint256 _minSalePriceInWei,bool _isToken,address _onlySellTo) public {
 
-        //it's not public.
-        
+        ////
+
     }
    
     function cancelSalesOrder(uint256 _index) public {
-        //it's not public.
+        ////
     }
 
     function deleteElement(uint256[] storage dataArray,uint256 index) internal {
@@ -287,23 +258,12 @@ contract CryptoBomberMarket is Ownable,ERC1155Holder{
 
     function buyNFT(uint256 _index) public payable {
 
-        //it's not public.
-        
+        ////
+
     }
 
     function withdraw() public{
-        Total storage _total = salesAmountList[_msgSender()];
-
-        if(_total.eth > 0){
-            require(address(this).balance >= _total.eth ,"error: eth Insufficient balance");
-            (bool s, ) = _msgSender().call{value: _total.eth}("");require(s);
-            _total.eth = 0;
-        }
-        if(_total.token > 0){
-            require(IERC20(paymentToken).balanceOf(address(this)) >= _total.token,"error: token Insufficient balance");
-            IERC20(paymentToken).transfer(_msgSender(), _total.token);
-            _total.token = 0;
-        }
+        ////
 
         emit Withdraw(_msgSender(),_total.eth,_total.token,block.timestamp);
     }
