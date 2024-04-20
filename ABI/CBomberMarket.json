@@ -10,16 +10,6 @@
 				"internalType": "address",
 				"name": "_devFundAddress",
 				"type": "address"
-			},
-			{
-				"internalType": "address",
-				"name": "_hostingPool",
-				"type": "address"
-			},
-			{
-				"internalType": "address",
-				"name": "_poolAdmin",
-				"type": "address"
 			}
 		],
 		"stateMutability": "nonpayable",
@@ -340,7 +330,7 @@
 						"type": "address"
 					}
 				],
-				"internalType": "struct CryptoBomberMarket.Order[]",
+				"internalType": "struct CBomberMarket.Order[]",
 				"name": "orders",
 				"type": "tuple[]"
 			}
@@ -425,7 +415,7 @@
 						"type": "address"
 					}
 				],
-				"internalType": "struct CryptoBomberMarket.Order[]",
+				"internalType": "struct CBomberMarket.Order[]",
 				"name": "orders",
 				"type": "tuple[]"
 			}
@@ -454,51 +444,12 @@
 	},
 	{
 		"inputs": [],
-		"name": "getDefiPoolOnState",
-		"outputs": [
-			{
-				"internalType": "bool",
-				"name": "",
-				"type": "bool"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
 		"name": "getDevFundAddress",
 		"outputs": [
 			{
 				"internalType": "address",
 				"name": "",
 				"type": "address"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "getHostingPool",
-		"outputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "getIsFundsFlowToPoolState",
-		"outputs": [
-			{
-				"internalType": "bool",
-				"name": "",
-				"type": "bool"
 			}
 		],
 		"stateMutability": "view",
@@ -580,7 +531,7 @@
 						"type": "address"
 					}
 				],
-				"internalType": "struct CryptoBomberMarket.Order[]",
+				"internalType": "struct CBomberMarket.Order[]",
 				"name": "orders",
 				"type": "tuple[]"
 			}
@@ -651,7 +602,7 @@
 						"type": "address"
 					}
 				],
-				"internalType": "struct CryptoBomberMarket.Order[]",
+				"internalType": "struct CBomberMarket.Order[]",
 				"name": "indexArray",
 				"type": "tuple[]"
 			}
@@ -722,7 +673,7 @@
 						"type": "address"
 					}
 				],
-				"internalType": "struct CryptoBomberMarket.Order[]",
+				"internalType": "struct CBomberMarket.Order[]",
 				"name": "orders",
 				"type": "tuple[]"
 			}
@@ -793,7 +744,7 @@
 						"type": "address"
 					}
 				],
-				"internalType": "struct CryptoBomberMarket.Order[]",
+				"internalType": "struct CBomberMarket.Order[]",
 				"name": "indexArray",
 				"type": "tuple[]"
 			}
@@ -804,19 +755,6 @@
 	{
 		"inputs": [],
 		"name": "getPaymentToken",
-		"outputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "getPoolAdmin",
 		"outputs": [
 			{
 				"internalType": "address",
@@ -898,7 +836,7 @@
 						"type": "address"
 					}
 				],
-				"internalType": "struct CryptoBomberMarket.Order",
+				"internalType": "struct CBomberMarket.Order",
 				"name": "",
 				"type": "tuple"
 			}
@@ -977,7 +915,7 @@
 						"type": "address"
 					}
 				],
-				"internalType": "struct CryptoBomberMarket.Order",
+				"internalType": "struct CBomberMarket.Order",
 				"name": "",
 				"type": "tuple"
 			}
@@ -1008,7 +946,7 @@
 						"type": "uint256"
 					}
 				],
-				"internalType": "struct CryptoBomberMarket.Total",
+				"internalType": "struct CBomberMarket.Total",
 				"name": "",
 				"type": "tuple"
 			}
@@ -1165,7 +1103,7 @@
 						"type": "address"
 					}
 				],
-				"internalType": "struct CryptoBomberMarket.Order",
+				"internalType": "struct CBomberMarket.Order",
 				"name": "",
 				"type": "tuple"
 			}
@@ -1234,19 +1172,6 @@
 	{
 		"inputs": [
 			{
-				"internalType": "bool",
-				"name": "_value",
-				"type": "bool"
-			}
-		],
-		"name": "setDefiPoolOnState",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
 				"internalType": "address",
 				"name": "_address",
 				"type": "address"
@@ -1265,46 +1190,7 @@
 				"type": "address"
 			}
 		],
-		"name": "setHostingPool",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "bool",
-				"name": "_value",
-				"type": "bool"
-			}
-		],
-		"name": "setIsFundsFlowToPoolState",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "_address",
-				"type": "address"
-			}
-		],
 		"name": "setPaymentToken",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "_address",
-				"type": "address"
-			}
-		],
-		"name": "setPoolAdmin",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
