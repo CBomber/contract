@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 // https://cbomber.io
-// CryptoBomberToken
+// CBomberToken
 pragma solidity ^0.8.8;
 
 abstract contract Context {
@@ -46,7 +46,6 @@ abstract contract Ownable is Context {
         emit OwnershipTransferred(oldOwner, newOwner);
     }
 }
-
 
 interface IERC20 {
     event Transfer(address indexed from, address indexed to, uint256 value);
@@ -221,7 +220,7 @@ abstract contract ERC20Burnable is Context, ERC20 {
     }
 }
 
-contract CryptoBomberToken is ERC20, ERC20Burnable, Ownable {
+contract CBomberToken is ERC20, ERC20Burnable, Ownable {
 
     uint256 private total;
 
@@ -233,32 +232,15 @@ contract CryptoBomberToken is ERC20, ERC20Burnable, Ownable {
 
     mapping (address => bool) private distributeUser;
     
-    constructor() ERC20("CryptoBomber Token", "CB"){
+    constructor() ERC20("CBomber Token", "CB"){
         total = 100000000 * (10 ** 18);
-    }
-
-    modifier onlyDistribute() {
-        require(isDistribute(_msgSender()) || owner() == _msgSender(), "Role: caller does not have the distribute role or above");
-        _;
-    }
-
-    function isDistribute(address account) public view returns (bool) {
-        return distributeUser[account];
-    }
-
-    function addDistribute(address account) public onlyOwner{
-        distributeUser[account] = true;
-    }
-
-    function removeDistribute(address account) public onlyOwner{
-        distributeUser[account] = false;
     }
 
     function mint(address to, uint256 amount) public onlyOwner {
         require(_totalSupply + amount <= total,"ERC20: Exceeding the maximum limit");
         _mint(to, amount);
     }
-
+    
     function _afterTokenTransfer(address from, address to, uint256 amount)
         internal
         override(ERC20)
@@ -278,70 +260,5 @@ contract CryptoBomberToken is ERC20, ERC20Burnable, Ownable {
         override(ERC20)
     {
         super._burn(account, amount);
-    }
-
-    function freeAmount(address user) internal view returns (uint256 amount) {
-        uint monthDiff;
-        uint unrestricted;
-
-        if (user == owner()) {
-            return _balances[user];
-        }
-        if (block.timestamp < timestamp[user]) {
-            monthDiff = 0;
-        }else{
-            monthDiff = (block.timestamp - timestamp[user]) / (30 days);
-		}
-        if (monthDiff >= unlockNum[user]) {
-            return _balances[user];
-        }
-        if (block.timestamp < timestamp[user]) {
-            unrestricted = 0;
-        }else{
-            unrestricted = distBalances[user] / (unlockNum[user]) * (monthDiff);
-        }
-        if (unrestricted > distBalances[user]) {
-            unrestricted = distBalances[user];
-        }
-        if (unrestricted + _balances[user] < distBalances[user]) {
-            amount = 0;
-        } else {
-            amount = unrestricted + (_balances[user]) - (distBalances[user]);
-        }
-        return amount;
-    }    
-
-    function getFreeAmount(address user) public view returns (uint256 amount) {
-        amount = freeAmount(user);
-        return amount;
-    }
- 
-    function getRestrictedAmount(address user) public view returns (uint256 amount) {
-        amount = _balances[user] - freeAmount(user);
-        return amount;
-    }
-
-    function distribute(uint256 _amount, address _to, uint256 _unlockNum, uint256 _startTime) public onlyDistribute {
-        require(distBalances[_to] == 0,"Lock already exists for the address"); 
-        require(_totalSupply + _amount <= total,"Exceeding the maximum limit");
- 
-        distBalances[_to] += _amount;
-        unlockNum[_to] += _unlockNum;
-        timestamp[_to] = _startTime > 0 ? _startTime : block.timestamp;
-        _mint(_to, _amount);
-
-        emit Distribute(_amount,_to,_unlockNum,_startTime,block.timestamp);
-    }
-    
-    function transfer(address _to, uint256 _value) public override returns (bool){
-        uint256 _freeAmount = freeAmount(_msgSender());
-        require(_freeAmount >= _value,"error: Exceeding the unlocking limit");
-        return super.transfer(_to, _value);
-    }
- 
-    function transferFrom(address _from, address _to, uint256 _value) public override returns (bool){
-        uint _freeAmount = freeAmount(_from);
-        require(_freeAmount >= _value,"error: Exceeding the unlocking limit");
-        return super.transferFrom(_from, _to, _value);
     }
 }
