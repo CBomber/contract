@@ -219,19 +219,6 @@
 	},
 	{
 		"inputs": [],
-		"name": "getIsSignInState",
-		"outputs": [
-			{
-				"internalType": "bool",
-				"name": "",
-				"type": "bool"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
 		"name": "getLevelLimit",
 		"outputs": [
 			{
@@ -259,38 +246,6 @@
 	{
 		"inputs": [],
 		"name": "getScoreBase",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "getSignInCredit",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "_user",
-				"type": "address"
-			}
-		],
-		"name": "getSignInLastTime",
 		"outputs": [
 			{
 				"internalType": "uint256",
@@ -485,19 +440,6 @@
 	{
 		"inputs": [
 			{
-				"internalType": "bool",
-				"name": "_value",
-				"type": "bool"
-			}
-		],
-		"name": "setIsSignInState",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
 				"internalType": "uint256",
 				"name": "newLevel",
 				"type": "uint256"
@@ -550,32 +492,12 @@
 	{
 		"inputs": [
 			{
-				"internalType": "uint256",
-				"name": "_value",
-				"type": "uint256"
-			}
-		],
-		"name": "setSignInCredit",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
 				"internalType": "address",
 				"name": "newAddress",
 				"type": "address"
 			}
 		],
 		"name": "setSignerAddress",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "signIn",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
