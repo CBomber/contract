@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 // https://cbomber.io
-//CryptoBomberProps
+// CBomberProps
 pragma solidity 0.8.8;
 
 abstract contract Context {
@@ -10,7 +10,7 @@ abstract contract Context {
 }
 
 library SafeMath {
-    
+
     function add(uint256 a, uint256 b) internal pure returns (uint256) {
         uint256 c = a + b;
         require(c >= a, "SafeMath: addition overflow");
@@ -26,9 +26,8 @@ library SafeMath {
         uint256 c = a - b;
         return c;
     }
+
 }
-
-
 
 library Address {
     
@@ -41,8 +40,9 @@ library Address {
 
 abstract contract Ownable is Context {
     address private _owner;
+
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
-    
+
     constructor () {
         address msgSender = _msgSender();
         _owner = msgSender;
@@ -75,7 +75,7 @@ interface IERC165 {
 }
 
 contract ERC165 is IERC165 {
-
+    
     bytes4 private constant _INTERFACE_ID_ERC165 = 0x01ffc9a7;
  
     mapping(bytes4 => bool) private _supportedInterfaces;
@@ -96,7 +96,7 @@ contract ERC165 is IERC165 {
 
 
 interface IERC1155Receiver is IERC165 {
-
+ 
     function onERC1155Received(
         address operator,
         address from,
@@ -118,7 +118,6 @@ interface IERC1155Receiver is IERC165 {
         returns(bytes4);
 }
 
-
 interface IERC1155 is IERC165 {
     event TransferSingle(address indexed operator, address indexed from, address indexed to, uint256 id, uint256 value);
     event TransferBatch(address indexed operator, address indexed from, address indexed to, uint256[] ids, uint256[] values);
@@ -132,6 +131,7 @@ interface IERC1155 is IERC165 {
     function safeBatchTransferFrom(address from, address to, uint256[] calldata ids, uint256[] calldata amounts, bytes calldata data) external;
 }
 
+
 interface IERC1155MetadataURI is IERC1155 {
     function uri(uint256 id) external view returns (string memory);
 }
@@ -139,10 +139,6 @@ interface IERC1155MetadataURI is IERC1155 {
 contract ERC1155 is Context, ERC165, IERC1155, IERC1155MetadataURI {
     using SafeMath for uint256;
     using Address for address;
-    
-    mapping (uint256 => uint256) private caps;
-    
-    uint256 private _currentTokenID = 0;
     
     struct AddressSet {
         address[] _values;
@@ -153,14 +149,13 @@ contract ERC1155 is Context, ERC165, IERC1155, IERC1155MetadataURI {
         uint256[] _values;
         mapping (uint256 => uint256) _indexes;
     }
-   
+    
     mapping (address => Uint256Set) private holderTokens;
     mapping (uint256 => AddressSet) private owners;
     mapping (uint256 => mapping(address => uint256)) private _balances;
     mapping (address => mapping(address => bool)) private _operatorApprovals;
 
     string private _uri;
-    
     bytes4 private constant _INTERFACE_ID_ERC1155 = 0xd9b67a26;
     bytes4 private constant _INTERFACE_ID_ERC1155_METADATA_URI = 0x0e89341c;
  
@@ -174,18 +169,8 @@ contract ERC1155 is Context, ERC165, IERC1155, IERC1155MetadataURI {
         return holderTokens[owner]._values;
     }
 
-    function getNextTokenID() public view returns (uint256) {
-        return _currentTokenID.add(1);
-    }
-    function _getNextTokenID() private view returns (uint256) {
-        return _currentTokenID.add(1);
-    }
-    function _incrementTokenTypeId() private  {
-        _currentTokenID ++;
-    }
-    
     function toString(uint256 value) internal pure returns (string memory) {
-        if (value == 0) {
+         if (value == 0) {
             return "0";
         }
         uint256 temp = value;
@@ -218,10 +203,6 @@ contract ERC1155 is Context, ERC165, IERC1155, IERC1155MetadataURI {
         return bytes(_uri).length > 0 ? strConcat(string(abi.encodePacked(_uri, toString(_id))), ".json"): "";
     }
     
-    function categoryOf(uint256 _id) public view returns (uint256 categoryId) {
-        return caps[_id];
-    }
-    
     function balanceOf(address account, uint256 id) public view override returns (uint256) {
         require(account != address(0), "ERC1155: balance query for the zero address");
         return _balances[id][account];
@@ -237,7 +218,6 @@ contract ERC1155 is Context, ERC165, IERC1155, IERC1155MetadataURI {
         returns (uint256[] memory)
     {
         require(accounts.length == ids.length, "ERC1155: accounts and ids length mismatch");
- 
         uint256[] memory batchBalances = new uint256[](accounts.length);
         for (uint256 i = 0; i < accounts.length; ++i) {
             require(accounts[i] != address(0), "ERC1155: batch balance query for the zero address");
@@ -252,7 +232,6 @@ contract ERC1155 is Context, ERC165, IERC1155, IERC1155MetadataURI {
  
     function setApprovalForAll(address operator, bool approved) public virtual override {
         require(_msgSender() != operator, "ERC1155: setting approval status for self");
- 
         _operatorApprovals[_msgSender()][operator] = approved;
         emit ApprovalForAll(_msgSender(), operator, approved);
     }
@@ -278,7 +257,7 @@ contract ERC1155 is Context, ERC165, IERC1155, IERC1155MetadataURI {
             "ERC1155: caller is not owner nor approved"
         );
         require(amount > 0 ,"Amount must be greater than 0");
- 
+
         address operator = _msgSender();
         _beforeTokenTransfer(operator, from, to, _asSingletonArray(id), _asSingletonArray(amount), data);
         _balances[id][from] = _balances[id][from].sub(amount, "ERC1155: insufficient balance for transfer");
@@ -289,7 +268,7 @@ contract ERC1155 is Context, ERC165, IERC1155, IERC1155MetadataURI {
         if (balanceOf(from, id) == 0) {
             setRemove(from, id);
         }
-        setAdd(to, id); 
+        setAdd(to, id);
     }
  
     function safeBatchTransferFrom(
@@ -302,7 +281,6 @@ contract ERC1155 is Context, ERC165, IERC1155, IERC1155MetadataURI {
         public
         virtual
         override
-        
     {
         require(ids.length == amounts.length, "ERC1155: ids and amounts length mismatch");
         require(to != address(0), "ERC1155: transfer to the zero address");
@@ -310,19 +288,18 @@ contract ERC1155 is Context, ERC165, IERC1155, IERC1155MetadataURI {
             from == _msgSender() || isApprovedForAll(from, _msgSender()),
             "ERC1155: transfer caller is not owner nor approved"
         );
- 
         address operator = _msgSender();
         _beforeTokenTransfer(operator, from, to, ids, amounts, data);
         for (uint256 i = 0; i < ids.length; ++i) {
             uint256 id = ids[i];
             uint256 amount = amounts[i];
+
             require(amount > 0 ,"Amount must be greater than 0");
             _balances[id][from] = _balances[id][from].sub(
                 amount,
                 "ERC1155: insufficient balance for transfer"
             );
             _balances[id][to] = _balances[id][to].add(amount);
-            
         }
         emit TransferBatch(operator, from, to, ids, amounts);
         _doSafeBatchTransferAcceptanceCheck(operator, from, to, ids, amounts, data);
@@ -340,12 +317,16 @@ contract ERC1155 is Context, ERC165, IERC1155, IERC1155MetadataURI {
  
     function _mint(address account, uint256 id, uint256 amount, bytes memory data) internal virtual {
         require(account != address(0), "ERC1155: mint to the zero address");
- 
+
         address operator = _msgSender();
+ 
         _beforeTokenTransfer(operator, address(0), account, _asSingletonArray(id), _asSingletonArray(amount), data);
+ 
         _balances[id][account] = _balances[id][account].add(amount);
         emit TransferSingle(operator, address(0), account, id, amount);
+ 
         _doSafeTransferAcceptanceCheck(operator, address(0), account, id, amount, data);
+
         setAdd(account, id);
     }
  
@@ -354,51 +335,37 @@ contract ERC1155 is Context, ERC165, IERC1155, IERC1155MetadataURI {
         require(ids.length == amounts.length, "ERC1155: ids and amounts length mismatch");
  
         address operator = _msgSender();
+ 
         _beforeTokenTransfer(operator, address(0), to, ids, amounts, data);
+ 
         for (uint i = 0; i < ids.length; i++) {
             _balances[ids[i]][to] = amounts[i].add(_balances[ids[i]][to]);
         }
+ 
         emit TransferBatch(operator, address(0), to, ids, amounts);
+ 
         _doSafeBatchTransferAcceptanceCheck(operator, address(0), to, ids, amounts, data);
+
         for (uint256 i = 0; i < ids.length; i++) {
+
             setAdd(to, ids[i]);
         }
-    }
-    
-    function _create(address account, uint256 _cap,uint256 amount, bytes memory data) internal returns (uint256) {
-        uint256 _id = _getNextTokenID();
-        _incrementTokenTypeId();
-        _mint(account,_id,amount,data);
-        caps[_id] = _cap;
-        return _id;
-    }
- 
-    function _createBatch(address account, uint256[] memory _caps,uint256[] memory _amounts, bytes memory data) internal returns(uint256[] memory){
-    
-        require(_caps.length == _amounts.length , "ERC1155: cap and amounts length mismatch");
-        uint256[] memory reIDs =new uint256[](_caps.length);
-        for (uint i = 0; i < _caps.length; i++) {
-            uint256 _id = _getNextTokenID();
-            _incrementTokenTypeId();
-            _mint(account,_id,_amounts[i],data);
-            caps[_id] = _caps[i];
-            reIDs[i] = _id;
-        }
-        return reIDs;
     }
     
     function _burn(address account, uint256 id, uint256 amount) internal virtual {
         require(account != address(0), "ERC1155: burn from the zero address");
  
         address operator = _msgSender();
+ 
         _beforeTokenTransfer(operator, account, address(0), _asSingletonArray(id), _asSingletonArray(amount), "");
+ 
         _balances[id][account] = _balances[id][account].sub(
             amount,
             "ERC1155: burn amount exceeds balance"
         );
-
+ 
         emit TransferSingle(operator, account, address(0), id, amount);
-        
+
         if (balanceOf(account, id) == 0) {
             setRemove(account, id);
         }
@@ -409,19 +376,21 @@ contract ERC1155 is Context, ERC165, IERC1155, IERC1155MetadataURI {
         require(ids.length == amounts.length, "ERC1155: ids and amounts length mismatch");
  
         address operator = _msgSender();
+ 
         _beforeTokenTransfer(operator, account, address(0), ids, amounts, "");
+ 
         for (uint i = 0; i < ids.length; i++) {
             _balances[ids[i]][account] = _balances[ids[i]][account].sub(
                 amounts[i],
                 "ERC1155: burn amount exceeds balance"
             );
         }
-
+ 
         emit TransferBatch(operator, account, address(0), ids, amounts);
         for (uint i = 0; i < ids.length; i++) {
             if (balanceOf(account, ids[i]) == 0) {
                 setRemove(account, ids[i]);
-            }
+        }
         }
     }
  
@@ -435,7 +404,7 @@ contract ERC1155 is Context, ERC165, IERC1155, IERC1155MetadataURI {
     )
         internal virtual
     { }
- 
+
     function _doSafeTransferAcceptanceCheck(
         address operator,
         address from,
@@ -494,6 +463,7 @@ contract ERC1155 is Context, ERC165, IERC1155, IERC1155MetadataURI {
             holderTokens[owner]._indexes[value] = holderTokens[owner]._values.length;
             owners[value]._values.push(owner);
             owners[value]._indexes[owner] = owners[value]._values.length;
+
             return true;
         } else {
             return false;
@@ -503,7 +473,9 @@ contract ERC1155 is Context, ERC165, IERC1155, IERC1155MetadataURI {
     function setRemove(address owner, uint256 value) internal returns (bool) {
         uint256 valueIndex = holderTokens[owner]._indexes[value];
         uint256 ownerIndex = owners[value]._indexes[owner];
+
         if (valueIndex != 0) {
+            
             uint256 toDeleteValueIndex = valueIndex - 1;
             uint256 lastIndex = holderTokens[owner]._values.length - 1;
             uint256 lastValue = holderTokens[owner]._values[lastIndex];
@@ -519,6 +491,7 @@ contract ERC1155 is Context, ERC165, IERC1155, IERC1155MetadataURI {
             owners[value]._indexes[lastAddress] = toDeleteOwnerIndex + 1;
             owners[value]._values.pop();
             delete owners[value]._indexes[owner];
+
             return true;
         } else {
             return false;
@@ -528,11 +501,14 @@ contract ERC1155 is Context, ERC165, IERC1155, IERC1155MetadataURI {
     function setContains(address owner, uint256 value) public view returns (bool) {
         return holderTokens[owner]._indexes[value] != 0;
     }
+
+    
 }
 
-contract CryptoBomberProps is ERC1155,Ownable{
+contract CBomberProps is ERC1155,Ownable{
     
     string public name;
+   
     string public symbol;
    
     mapping (address => bool) private minterUser;
@@ -568,7 +544,6 @@ contract CryptoBomberProps is ERC1155,Ownable{
         public
         onlyMinter
     {   
-        require(categoryOf(id) > 0,"error: This tokenid has no category");
         _mint(account, id, amount, data);
     }
 
@@ -576,18 +551,7 @@ contract CryptoBomberProps is ERC1155,Ownable{
         public
         onlyMinter
     {
-        for(uint i = 0; i < ids.length; i++){
-            require(categoryOf(ids[i]) > 0,"error: This tokenid has no category");
-        }
         _mintBatch(to, ids, amounts, data);
-    }
-
-    function create(address account, uint256 _cap,uint256 _amount, bytes memory data) public onlyMinter returns (uint256) {
-        return _create(account,_cap,_amount,data);
-    }
- 
-    function createBatch(address account, uint256[] memory _caps,uint256[] memory _amounts, bytes memory data) public onlyMinter returns(uint256[] memory){
-        return _createBatch(account,_caps,_amounts,data);
     }
 
     function burn(address account, uint256 id, uint256 value) public virtual {
