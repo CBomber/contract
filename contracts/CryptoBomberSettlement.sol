@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 // https://cbomber.io
-// CryptoBomberSettlement
+// CBomberSettlement
 pragma solidity 0.8.8;
 
 abstract contract Context {
@@ -176,7 +176,7 @@ abstract contract Pausable is Context {
     }
 }
 
-contract CryptoBomberSettlement is Ownable, Pausable{
+contract CBomberSettlement is Ownable, Pausable{
 
     using SafeMath for uint256;
     using ECDSA for *;
@@ -188,19 +188,15 @@ contract CryptoBomberSettlement is Ownable, Pausable{
         bool issubmit;
     }
 
-    mapping(address => uint256) signInLastTime;
     mapping(address => userInfo) private userInfoMap;
     mapping(bytes32 => bool) private signerBytesMap;
     mapping (address => bool) private gameDaoUser;
 
     address private signerAddress;
     uint256 private INTERVAL_TIME = 1 minutes;
-    uint256 private SIGNIN_INTERVAL_TIME = 24 hours;
     uint256 private levelLimit = 6;
     uint256 private scoreBase = 10;
     uint256[] private invitationCredits = [5,1];
-    uint256 private signInCredit = 2;
-    bool private isSignInState = false;
 
     address private propsNft;
     address private data;
@@ -284,13 +280,6 @@ contract CryptoBomberSettlement is Ownable, Pausable{
         invitationCredits = _values;
     }
 
-    function getIsSignInState() public view returns(bool){
-        return isSignInState;
-    }
-
-    function setIsSignInState(bool _value) public onlyGameDao{
-        isSignInState = _value;
-    }
 
     function _setReferrer(uint256 _code) internal {
         address referrer = IData(data).referrerCodeAssociatedAddress(_code);
@@ -348,26 +337,8 @@ contract CryptoBomberSettlement is Ownable, Pausable{
         return levelLimit;
     }
 
-    function getSignInCredit() public view returns(uint256){
-        return signInCredit;
-    }
-
-    function setSignInCredit(uint256 _value) public onlyGameDao{
-        signInCredit = _value;
-    }
-
     function submit(bytes32 _hashedMessage,bytes memory _signature, uint256 _score, uint256 code) public whenNotPaused{
-        //it's not public.
+        ////
     }
 
-    function signIn() public {
-        require(isSignInState,'error: Exchange not enabled');
-        require(block.timestamp.sub(signInLastTime[_msgSender()]) >= SIGNIN_INTERVAL_TIME,"error: Insufficient interval time");
-        IData(data).addCredit(_msgSender(),signInCredit);
-        signInLastTime[_msgSender()] = block.timestamp;
-    }
-
-    function getSignInLastTime(address _user) public view returns(uint256){
-        return signInLastTime[_user];
-    }
 }
