@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 // https://cbomber.io
-// CryptoBomberData
+// CBomberData
 pragma solidity ^0.8.8;
 
 abstract contract Context {
@@ -61,7 +61,7 @@ abstract contract Ownable is Context {
     }
 }
 
-contract CryptoBomberData is Ownable{
+contract CBomberData is Ownable{
 
     using SafeMath for uint256;
 
@@ -228,4 +228,6 @@ contract CryptoBomberData is Ownable{
         emit Register( _msgSender(),code,block.timestamp);
     }
 }
+
+
 
