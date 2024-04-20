@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 // https://cbomber.io
-// CryptoBomberBasic
+// CBomberBasic
 pragma solidity 0.8.8;
 
 abstract contract Context {
@@ -505,7 +505,7 @@ contract ERC1155 is Context, ERC165, IERC1155, IERC1155MetadataURI {
     
 }
 
-contract CryptoBomberBasic is ERC1155,Ownable{
+contract CBomberBasic is ERC1155,Ownable{
     
     string public name;
    
@@ -520,7 +520,7 @@ contract CryptoBomberBasic is ERC1155,Ownable{
     
    constructor() ERC1155("https://cbomber.io/api/basic/") 
     {
-        name = "CryptoBomber Basic NFT";
+        name = "CBomber Basic NFT";
         symbol = "CBBN";
     }
 
