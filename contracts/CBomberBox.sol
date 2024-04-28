@@ -172,13 +172,15 @@ contract CBomberBox is Ownable, Pausable{
 
     uint256 private upgradeNumber = 2;
     uint256 private boxTokenIDMax = 6;
-    uint256 public totalBoxOpened =0;
+    uint256 public totalBoxOpened = 0;
 
     bool private isBoxUpgradeState = false;
     bool private isBoxExchangeState = false;
     bool private isBoxDestroyState = false;
     mapping (address => bool) private gameDaoUser;
-    mapping(uint256 =>uint256[]) boxContainTokenIDs;
+    mapping (uint256 => uint256[]) positionContainTokenIDs;
+    mapping (uint256 => uint256[]) boxContainPositions;
+    mapping (uint256 => uint256[]) boxContainTokenNums;
     mapping (uint256 => uint256) needOpenBoxGas;
     mapping(uint256 => uint256) boxRatio;
     mapping(uint256 => uint256) basicRatio;
@@ -189,7 +191,6 @@ contract CBomberBox is Ownable, Pausable{
     event Destroy(address user,uint256 tokenID,uint256 number,uint256 credit,uint256 time);
 
     constructor (address _basicNFT,address _propsNFT,address _devAddress,address _data) {
-
         rewardNFT = _basicNFT;
         boxNFT = _propsNFT;
         devFundAddress = _devAddress;
@@ -198,6 +199,7 @@ contract CBomberBox is Ownable, Pausable{
         pause();
 
         initNeedOpenBoxGas();
+        initBoxContainPositions();
         initBoxRatio();
     }
 
@@ -216,6 +218,15 @@ contract CBomberBox is Ownable, Pausable{
 
     function removeGameDao(address account) public onlyOwner{
         gameDaoUser[account] = false;
+    }
+
+    function initBoxContainPositions() internal {
+        boxContainPositions[1] = [11,12];
+        boxContainPositions[2] = [13,14];
+        boxContainPositions[3] = [7,8,9,10];
+        boxContainPositions[4] = [4,5,6];
+        boxContainPositions[5] = [1,2,3];
+        boxContainPositions[6] = [15,16,17];
     }
 
     function initNeedOpenBoxGas() internal {
@@ -316,12 +327,28 @@ contract CBomberBox is Ownable, Pausable{
         _unpause();
     }
 
-    function updateBoxContainTokenIDs(uint256 _position, uint256[] memory _tokenIDs) public onlyGameDao{
-        boxContainTokenIDs[_position] = _tokenIDs;
+    function updatePositionContainTokenIDs(uint256 _position, uint256[] memory _tokenIDs) public onlyGameDao{
+        positionContainTokenIDs[_position] = _tokenIDs;
     }
 
-    function getBoxContainTokenIDs(uint256 _position) public view returns(uint256[] memory){
-        return boxContainTokenIDs[_position];
+    function getPositionContainTokenIDs(uint256 _position) public view returns(uint256[] memory){
+        return positionContainTokenIDs[_position];
+    }
+
+    function updateBoxContainPositions(uint256 _boxTokenID, uint256[] memory _positions) public onlyGameDao{
+        boxContainPositions[_boxTokenID] = _positions;
+    }
+
+    function getBoxContainPositions(uint256 _boxTokenID) public view returns(uint256[] memory){
+        return boxContainPositions[_boxTokenID];
+    }
+
+    function updateBoxContainTokenNums(uint256 _boxTokenID,uint256[] memory _tokenNums) public onlyGameDao{
+        boxContainTokenNums[_boxTokenID] = _tokenNums;
+    }
+
+    function getBoxContainTokenNums(uint256 _boxTokenID) public view returns(uint256[] memory){
+        return boxContainTokenNums[_boxTokenID];
     }
 
     function updateBoxRatio(uint256 _tokenid,uint256 _value) public onlyGameDao{
@@ -352,8 +379,9 @@ contract CBomberBox is Ownable, Pausable{
     } 
 
     function executeRewardNFT(uint256 tokenID) internal{
-
-        uint256[] memory tokenids = boxContainTokenIDs[tokenID];
+        uint256[] memory positions = boxContainPositions[tokenID];
+        uint256 positionIndex = random(positions.length);
+        uint256[] memory tokenids = positionContainTokenIDs[positions[positionIndex]];
         uint256 tokenidIndex = random(tokenids.length);
         uint256 tokenid = tokenids[tokenidIndex];
         IERC1155(rewardNFT).mint(_msgSender(), tokenid, 1, '0x0');
@@ -371,9 +399,9 @@ contract CBomberBox is Ownable, Pausable{
         IERC1155(boxNFT).burn(_msgSender(), tokenID,1);
         
         executeRewardNFT(tokenID);
-        
+       
         (bool s, ) = devFundAddress.call{value: msg.value}("");require(s);
-        
+       
     }
 
     function boxUpgrade(uint256 tokenID,uint256 number) public whenNotPaused{
@@ -400,7 +428,6 @@ contract CBomberBox is Ownable, Pausable{
 
         emit Exchange(_msgSender(),tokenID,number,block.timestamp);
     }
-
 
     function boxDestroy(uint256 tokenID,uint256 number) public whenNotPaused{
         require(isBoxDestroyState,'error: Exchange not enabled');
