@@ -33,6 +33,25 @@
 		"anonymous": false,
 		"inputs": [
 			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "account",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "bool",
+				"name": "_isOperator",
+				"type": "bool"
+			}
+		],
+		"name": "Operator",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
 				"indexed": true,
 				"internalType": "address",
 				"name": "previousOwner",
@@ -149,7 +168,7 @@
 				"type": "address"
 			}
 		],
-		"name": "addMinter",
+		"name": "addOperator",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
@@ -280,7 +299,7 @@
 				"type": "address"
 			}
 		],
-		"name": "isMinter",
+		"name": "isOperator",
 		"outputs": [
 			{
 				"internalType": "bool",
@@ -400,7 +419,7 @@
 				"type": "address"
 			}
 		],
-		"name": "removeMinter",
+		"name": "removeOperator",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
