@@ -8,7 +8,7 @@
 			},
 			{
 				"internalType": "address",
-				"name": "_propsNft",
+				"name": "_basic",
 				"type": "address"
 			},
 			{
@@ -31,20 +31,8 @@
 			},
 			{
 				"indexed": false,
-				"internalType": "address",
-				"name": "nftAddress",
-				"type": "address"
-			},
-			{
-				"indexed": false,
 				"internalType": "uint256",
 				"name": "tokenid",
-				"type": "uint256"
-			},
-			{
-				"indexed": false,
-				"internalType": "uint256",
-				"name": "number",
 				"type": "uint256"
 			},
 			{
@@ -95,6 +83,90 @@
 			{
 				"indexed": false,
 				"internalType": "address",
+				"name": "_badge",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "_value",
+				"type": "uint256"
+			}
+		],
+		"name": "SetBadgePercent",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "_limitValue",
+				"type": "uint256"
+			}
+		],
+		"name": "SetBasicTokenIDLimit",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "_time",
+				"type": "uint256"
+			}
+		],
+		"name": "SetIntervalTime",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "_nft",
+				"type": "address"
+			}
+		],
+		"name": "SetNftAddress",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "score",
+				"type": "uint256"
+			}
+		],
+		"name": "SetScoreBase",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "_signer",
+				"type": "address"
+			}
+		],
+		"name": "SetSignerAddress",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "address",
 				"name": "user",
 				"type": "address"
 			},
@@ -128,27 +200,21 @@
 		"type": "event"
 	},
 	{
-		"inputs": [
+		"inputs": [],
+		"name": "BASE_PERCENT",
+		"outputs": [
 			{
-				"internalType": "address",
-				"name": "account",
-				"type": "address"
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
 			}
 		],
-		"name": "addGameDao",
-		"outputs": [],
-		"stateMutability": "nonpayable",
+		"stateMutability": "view",
 		"type": "function"
 	},
 	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "_user",
-				"type": "address"
-			}
-		],
-		"name": "credit",
+		"inputs": [],
+		"name": "INTERVAL_TIME",
 		"outputs": [
 			{
 				"internalType": "uint256",
@@ -162,25 +228,12 @@
 	{
 		"inputs": [
 			{
-				"internalType": "address",
-				"name": "_user",
-				"type": "address"
-			}
-		],
-		"name": "exp",
-		"outputs": [
-			{
 				"internalType": "uint256",
 				"name": "",
 				"type": "uint256"
 			}
 		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "getDataAddress",
+		"name": "badges",
 		"outputs": [
 			{
 				"internalType": "address",
@@ -193,46 +246,7 @@
 	},
 	{
 		"inputs": [],
-		"name": "getIntervalTime",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "getInvitationCredit",
-		"outputs": [
-			{
-				"internalType": "uint256[]",
-				"name": "",
-				"type": "uint256[]"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "getLevelLimit",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "getNftAddress",
+		"name": "basicNft",
 		"outputs": [
 			{
 				"internalType": "address",
@@ -245,20 +259,7 @@
 	},
 	{
 		"inputs": [],
-		"name": "getScoreBase",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "getSignerAddress",
+		"name": "data",
 		"outputs": [
 			{
 				"internalType": "address",
@@ -277,7 +278,7 @@
 				"type": "address"
 			}
 		],
-		"name": "getUserSubmitCount",
+		"name": "getPercentageOfNFT",
 		"outputs": [
 			{
 				"internalType": "uint256",
@@ -296,50 +297,39 @@
 				"type": "address"
 			}
 		],
-		"name": "getUserSubmitLastTime",
+		"name": "getUserInfo",
 		"outputs": [
 			{
-				"internalType": "uint256",
+				"components": [
+					{
+						"internalType": "uint256",
+						"name": "count",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "lasttime",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "lastTokenID",
+						"type": "uint256"
+					},
+					{
+						"internalType": "bool",
+						"name": "lastIsNft",
+						"type": "bool"
+					},
+					{
+						"internalType": "bool",
+						"name": "issubmit",
+						"type": "bool"
+					}
+				],
+				"internalType": "struct CBomberSettlement.userInfo",
 				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "_account",
-				"type": "address"
-			}
-		],
-		"name": "getUserisSubmit",
-		"outputs": [
-			{
-				"internalType": "bool",
-				"name": "",
-				"type": "bool"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "account",
-				"type": "address"
-			}
-		],
-		"name": "isGameDao",
-		"outputs": [
-			{
-				"internalType": "bool",
-				"name": "",
-				"type": "bool"
+				"type": "tuple"
 			}
 		],
 		"stateMutability": "view",
@@ -379,19 +369,6 @@
 		"type": "function"
 	},
 	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "account",
-				"type": "address"
-			}
-		],
-		"name": "removeGameDao",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
 		"inputs": [],
 		"name": "renounceOwnership",
 		"outputs": [],
@@ -399,14 +376,45 @@
 		"type": "function"
 	},
 	{
+		"inputs": [],
+		"name": "scoreBase",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
 		"inputs": [
 			{
 				"internalType": "address",
-				"name": "_data",
+				"name": "_badge",
 				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_value",
+				"type": "uint256"
 			}
 		],
-		"name": "setDataAddress",
+		"name": "setBadgePercent",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_limit",
+				"type": "uint256"
+			}
+		],
+		"name": "setBasicTokenIDLimit",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
@@ -427,51 +435,12 @@
 	{
 		"inputs": [
 			{
-				"internalType": "uint256[]",
-				"name": "_values",
-				"type": "uint256[]"
-			}
-		],
-		"name": "setInvitationCredit",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "newLevel",
-				"type": "uint256"
-			}
-		],
-		"name": "setLevelLimit",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
 				"internalType": "address",
 				"name": "newNFTAddress",
 				"type": "address"
 			}
 		],
 		"name": "setNftAddress",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "_code",
-				"type": "uint256"
-			}
-		],
-		"name": "setReferrer",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
@@ -503,6 +472,19 @@
 		"type": "function"
 	},
 	{
+		"inputs": [],
+		"name": "signerAddress",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
 		"inputs": [
 			{
 				"internalType": "bytes32",
@@ -518,16 +500,24 @@
 				"internalType": "uint256",
 				"name": "_score",
 				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "code",
-				"type": "uint256"
 			}
 		],
 		"name": "submit",
 		"outputs": [],
 		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "tokenIDLimit",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
 		"type": "function"
 	},
 	{
