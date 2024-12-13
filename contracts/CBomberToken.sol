@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 // https://cbomber.io
 // CBomberToken
-pragma solidity ^0.8.8;
+pragma solidity ^0.8.20;
 
 abstract contract Context {
     function _msgSender() internal view virtual returns (address) {
@@ -46,6 +46,7 @@ abstract contract Ownable is Context {
         emit OwnershipTransferred(oldOwner, newOwner);
     }
 }
+
 
 interface IERC20 {
     event Transfer(address indexed from, address indexed to, uint256 value);
@@ -224,23 +225,10 @@ contract CBomberToken is ERC20, ERC20Burnable, Ownable {
 
     uint256 private total;
 
-    mapping(address => uint256) timestamp; 
-    mapping(address => uint256) distBalances;
-    mapping(address => uint256) unlockNum;
-
-    event Distribute(uint256 _amount, address _to, uint256 _unlockNum, uint256 _startTime, uint256 _time);
-
-    mapping (address => bool) private distributeUser;
-    
-    constructor() ERC20("CBomber Token", "CB"){
-        total = 100000000 * (10 ** 18);
+    constructor() ERC20("CBomber Token", "CBT"){
+        total = 10000000000 * (10 ** 18);
     }
-
-    function mint(address to, uint256 amount) public onlyOwner {
-        require(_totalSupply + amount <= total,"ERC20: Exceeding the maximum limit");
-        _mint(to, amount);
-    }
-    
+ 
     function _afterTokenTransfer(address from, address to, uint256 amount)
         internal
         override(ERC20)
@@ -261,4 +249,10 @@ contract CBomberToken is ERC20, ERC20Burnable, Ownable {
     {
         super._burn(account, amount);
     }
+
+    function mint(address to, uint256 amount) public onlyOwner {
+        require(_totalSupply + amount <= total,"ERC20: Exceeding the maximum limit");
+        _mint(to, amount);
+    }
+
 }

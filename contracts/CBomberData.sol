@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 // https://cbomber.io
 // CBomberData
-pragma solidity ^0.8.8;
+pragma solidity ^0.8.20;
 
 abstract contract Context {
     function _msgSender() internal view virtual returns (address) {
@@ -66,21 +66,25 @@ contract CBomberData is Ownable{
     using SafeMath for uint256;
 
     struct userInfo {
-        uint256 code;
-        uint256 referrerCode;
+        address referrer;
         uint256 exp; 
         uint256 credit; 
         uint256 invitation;
+        bool isReferrer;
         bool state;
     }
 
     mapping (address => bool) private systemUser;
     mapping (address => userInfo) private userInfoMap;
-    mapping(uint256 => address) private codes;
 
-    uint256 private _currentReferrerCode = 0;
-
-    event Register(address referrer,uint256 code,uint256 time);
+    event Register(address referrer,uint256 time);
+    event System(address _account,bool _state);
+    event AddExp(address _account,uint256 _value);
+    event SubExp(address _account,uint256 _value);
+    event AddCredit(address _account,uint256 _value);
+    event AddInvitation(address _account,uint256 _value);
+    event SubCredit(address _account,uint256 _value);
+    event SetReferrer(address _account,address _referrer);
 
     modifier onlySystem() {
         require(isSystem(_msgSender()) || owner() == _msgSender(), "Role: caller does not have the System role or above");
@@ -93,22 +97,12 @@ contract CBomberData is Ownable{
 
     function addSystem(address account) public onlyOwner{
         systemUser[account] = true;
+        emit System(account,true);
     }
 
     function removeSystem(address account) public onlyOwner{
         systemUser[account] = false;
-    }
-
-    function getNextReferrerCode() public view returns (uint256) {
-        return _currentReferrerCode.add(1);
-    }
-
-    function _getNextReferrerCode() internal view returns (uint256) {
-        return _currentReferrerCode.add(1);
-    }
-
-    function _incrementReferrerCode() internal  {
-        _currentReferrerCode ++;
+        emit System(account,false);
     }
     
     function addExp(address _user,uint256 _value) public onlySystem{
@@ -116,18 +110,20 @@ contract CBomberData is Ownable{
             userInfoMap[_user].exp = userInfoMap[_user].exp.add(_value);
         }else{
             userInfoMap[_user] = userInfo({
-            code : 0,
-            referrerCode : 0,
+            referrer : address(0),
             exp : _value,
             credit : 0,
             invitation : 0,
+            isReferrer : false,
             state : true
             });
         }
+        emit AddExp(_user,_value);
     }
 
     function subExp(address _user,uint256 _value) public onlySystem{
         userInfoMap[_user].exp = userInfoMap[_user].exp.sub(_value);
+        emit SubExp(_user,_value);
     }
 
     function exp(address _user) public view returns(uint256){
@@ -139,14 +135,15 @@ contract CBomberData is Ownable{
             userInfoMap[_user].credit = userInfoMap[_user].credit.add(_value);
         }else{
             userInfoMap[_user] = userInfo({
-            code : 0,
-            referrerCode : 0,
+            referrer : address(0),
             exp : 0,
             credit : _value,
             invitation : 0,
+            isReferrer : false,
             state : true
             });
         }
+        emit AddCredit(_user,_value);
     }
 
     function addInvitation(address _referrer,uint256 _value) public onlySystem{
@@ -154,18 +151,20 @@ contract CBomberData is Ownable{
             userInfoMap[_referrer].invitation = userInfoMap[_referrer].invitation.add(_value);
         }else{
             userInfoMap[_referrer] = userInfo({
-            code : 0,
-            referrerCode : 0,
+            referrer : address(0),
             exp : 0,
             credit : 0,
             invitation : _value,
+            isReferrer : false,
             state : true
             });
         }
+        emit AddInvitation(_referrer,_value);
     }
 
     function subCredit(address _user,uint256 _value) public onlySystem{
         userInfoMap[_user].credit = userInfoMap[_user].credit.sub(_value);
+        emit SubCredit(_user,_value);
     }
 
     function credit(address _user) public view returns(uint256){
@@ -176,56 +175,42 @@ contract CBomberData is Ownable{
         return userInfoMap[_user].invitation;
     }
 
-    function referrerCode(address _user) public view returns(uint256){
-        return userInfoMap[_user].referrerCode;
-    }
 
     function referrerAddress(address _user) public view returns(address){
-        return codes[userInfoMap[_user].referrerCode];
+        return userInfoMap[_user].referrer;
     }
 
-    function referrerCodeAssociatedAddress(uint256 _code) public view returns(address){
-        return codes[_code];
-    }
-
-    function getRegisterReferrerCode(address _user) public view returns(uint256){
-        return userInfoMap[_user].code;
-    }
-
-    function setReferrer(address _user,uint256 _code) public onlySystem{
+    function setReferrer(address _user,address _referrer) public onlySystem{
         if(userInfoMap[_user].state){
-            userInfoMap[_user].referrerCode = _code;
+            userInfoMap[_user].referrer = _referrer;
         }else{
             userInfoMap[_user] = userInfo({
-            code : 0,
-            referrerCode : _code,
+            referrer : _referrer,
             exp : 0,
             credit : 0,
             invitation : 0,
+            isReferrer : false,
             state : true
             });
         }
     }
 
     function register() public {
-        require(userInfoMap[_msgSender()].code == 0,"error: Address is registered");
+        require(userInfoMap[_msgSender()].isReferrer == false,"error: Address is registered");
 
-        uint256 code = _getNextReferrerCode();
-        codes[code] = _msgSender();
         if(userInfoMap[_msgSender()].state){
-            userInfoMap[_msgSender()].code = code;
+            userInfoMap[_msgSender()].isReferrer = true;
         }else{
             userInfoMap[_msgSender()] = userInfo({
-            code : code,
-            referrerCode : 0,
+            referrer : address(0),
             exp : 0,
             credit : 0,
             invitation : 0,
+            isReferrer : true,
             state : true
             });
         }
-        _incrementReferrerCode();
-        emit Register( _msgSender(),code,block.timestamp);
+        emit Register( _msgSender(),block.timestamp);
     }
 }
 

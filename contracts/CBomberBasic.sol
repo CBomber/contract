@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 // https://cbomber.io
 // CBomberBasic
-pragma solidity 0.8.8;
+pragma solidity 0.8.20;
 
 abstract contract Context {
     function _msgSender() internal view virtual returns (address) {
@@ -502,7 +502,6 @@ contract ERC1155 is Context, ERC165, IERC1155, IERC1155MetadataURI {
         return holderTokens[owner]._indexes[value] != 0;
     }
 
-    
 }
 
 contract CBomberBasic is ERC1155,Ownable{
@@ -511,12 +510,9 @@ contract CBomberBasic is ERC1155,Ownable{
    
     string public symbol;
    
-    mapping (address => bool) private minterUser;
-    
-    modifier onlyMinter() {
-        require(isMinter(_msgSender()) || owner() == _msgSender(), "MinterRole: caller does not have the Minter role or above");
-        _;
-    }
+    mapping (address => bool) private operators;
+
+    event Operator(address account,bool _isOperator);
     
    constructor() ERC1155("https://cbomber.io/api/basic/") 
     {
@@ -524,16 +520,23 @@ contract CBomberBasic is ERC1155,Ownable{
         symbol = "CBBN";
     }
 
-    function isMinter(address account) public view returns (bool) {
-        return minterUser[account];
+    modifier onlyOperator() {
+        require(isOperator(_msgSender()) || owner() == _msgSender(), "MinterRole: caller does not have the Minter role or above");
+        _;
     }
 
-    function addMinter(address account) public onlyOwner{
-        minterUser[account] = true;
+    function isOperator(address account) public view returns (bool) {
+        return operators[account];
     }
 
-    function removeMinter(address account) public onlyOwner{
-        minterUser[account] = false;
+    function addOperator(address account) public onlyOwner{
+        operators[account] = true;
+        emit Operator(account,true);
+    }
+
+    function removeOperator(address account) public onlyOwner{
+        operators[account] = false;
+        emit Operator(account,false);
     }
 
     function setURI(string memory _url) public onlyOwner{
@@ -542,14 +545,14 @@ contract CBomberBasic is ERC1155,Ownable{
 
     function mint(address account, uint256 id, uint256 amount, bytes memory data)
         public
-        onlyMinter
+        onlyOperator
     {   
         _mint(account, id, amount, data);
     }
 
     function mintBatch(address to, uint256[] memory ids, uint256[] memory amounts, bytes memory data)
         public
-        onlyMinter
+        onlyOperator
     {
         _mintBatch(to, ids, amounts, data);
     }

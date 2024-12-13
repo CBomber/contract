@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 // https://cbomber.io
 // CBomberSettlement
-pragma solidity 0.8.8;
+pragma solidity 0.8.20;
 
 abstract contract Context {
     function _msgSender() internal view virtual returns (address) {
@@ -83,21 +83,6 @@ library ECDSA {
 
 }
 
-interface IERC1155 {
-    function mint(address account, uint256 id, uint256 amount, bytes memory data) external;
-}
-
-interface IData{
-    function addExp(address _user,uint256 _value) external;
-    function exp(address _user) external view returns(uint256);
-    function addCredit(address _user,uint256 _value) external;
-    function credit(address _user) external view returns(uint256);
-    function setReferrer(address _user,uint256 _code) external;
-    function addInvitation(address _referrer,uint256 _value) external;
-    function referrerCodeAssociatedAddress(uint256 _code) external view returns(address);
-    function referrerCode(address _user) external view returns(uint256);
-    function referrerAddress(address _user) external view returns(address);
-}
 
 abstract contract Ownable is Context {
 
@@ -176,37 +161,58 @@ abstract contract Pausable is Context {
     }
 }
 
+interface IData{
+    function addExp(address _user,uint256 _value) external;
+}
+
+interface IERC1155 {
+    function mint(address account, uint256 id, uint256 amount, bytes memory data) external;
+}
+
+interface IERC721 {
+    function balanceOf(address owner) external view returns (uint256) ;
+}
+
 contract CBomberSettlement is Ownable, Pausable{
 
     using SafeMath for uint256;
     using ECDSA for *;
 
     struct userInfo {
-        address user; 
         uint256 count; 
         uint256 lasttime;
+        uint256 lastTokenID;
+        bool lastIsNft;
         bool issubmit;
     }
 
     mapping(address => userInfo) private userInfoMap;
     mapping(bytes32 => bool) private signerBytesMap;
-    mapping (address => bool) private gameDaoUser;
 
-    address private signerAddress;
-    uint256 private INTERVAL_TIME = 1 minutes;
-    uint256 private levelLimit = 6;
-    uint256 private scoreBase = 10;
-    uint256[] private invitationCredits = [5,1];
+    address public signerAddress;
+    uint256 public INTERVAL_TIME = 1 minutes;
+    uint256 public scoreBase = 10;
 
-    address private propsNft;
-    address private data;
+    address public basicNft;
+    address public data;
+    address[] public badges;
+    uint256 public tokenIDLimit = 1907;
+    uint256 public BASE_PERCENT = 10;
 
+    mapping(address => uint256) badgePercent;
+    
+    event SetBasicTokenIDLimit(uint256 _limitValue);
+    event SetBadgePercent(address _badge,uint256 _value);
+    event SetScoreBase(uint256 score);
+    event SetNftAddress(address _nft);
+    event SetIntervalTime(uint256 _time);
+    event SetSignerAddress(address _signer);
     event Submit(address user,uint256 score,uint256 time);
-    event AwardNFT(address user,address nftAddress,uint256 tokenid,uint256 number,uint256 time);
+    event AwardNFT(address user,uint256 tokenid,uint256 time);
 
-    constructor (address _signer,address _propsNft,address _data) {
+    constructor (address _signer,address _basic,address _data) {
         signerAddress = _signer;
-        propsNft = _propsNft;
+        basicNft = _basic;
         data = _data;
         pause();
     }
@@ -219,126 +225,114 @@ contract CBomberSettlement is Ownable, Pausable{
         _unpause();
     }
 
-    modifier onlyGameDao() {
-        require(isGameDao(_msgSender()) || owner() == _msgSender(), "Role: caller does not have the GameDao role or above");
-        _;
+    function getUserInfo(address _account) public view returns(userInfo memory){
+        return userInfoMap[_account];
     }
 
-    function isGameDao(address account) public view returns (bool) {
-        return gameDaoUser[account];
+    function setBadgePercent(address _badge,uint256 _value) public onlyOwner {
+        badgePercent[_badge] = _value;
+        if(!judgmentBadges(_badge)) badges.push(_badge);
+
+        emit SetBadgePercent(_badge,_value);
     }
 
-    function addGameDao(address account) public onlyOwner{
-        gameDaoUser[account] = true;
+    function judgmentBadges(address _badge) internal view returns(bool){
+        for(uint index = 0 ; 0 < badges.length ; index ++){
+            if(badges[index] == _badge) return true;
+        }
+        return false;
     }
 
-    function removeGameDao(address account) public onlyOwner{
-        gameDaoUser[account] = false;
+    function setBasicTokenIDLimit(uint256 _limit) public onlyOwner{
+        tokenIDLimit = _limit;
+
+        emit SetBasicTokenIDLimit(_limit);
     }
 
-    function exp(address _user) public view returns(uint256){
-        return IData(data).exp(_user);
-    }
-
-    function credit(address _user) public view returns(uint256){
-        return IData(data).credit(_user);
-    }
-
-    function getDataAddress() public view returns(address){
-        return data;
-    }
-
-    function setDataAddress(address _data) public onlyOwner{
-        data = _data;
-    }
-
-    function getUserisSubmit(address _account) public view returns(bool){
-        return userInfoMap[_account].issubmit;
-    }
-
-    function getUserSubmitCount(address _account) public view returns(uint256){
-        return userInfoMap[_account].count;
-    }
-
-    function getUserSubmitLastTime(address _account) public view returns(uint256){
-        return userInfoMap[_account].lasttime;
-    }
-
-    function getScoreBase() public view returns(uint256){
-        return scoreBase;
-    }
-
-    function setScoreBase(uint256 _value) public onlyGameDao{
+    function setScoreBase(uint256 _value) public onlyOwner{
         scoreBase = _value;
-    }
-
-    function getInvitationCredit() public view returns(uint256[] memory){
-        return invitationCredits;
-    }
-
-    function setInvitationCredit(uint256[] memory _values) public onlyGameDao{
-        invitationCredits = _values;
-    }
-
-
-    function _setReferrer(uint256 _code) internal {
-        address referrer = IData(data).referrerCodeAssociatedAddress(_code);
-        if(referrer != address(0) && IData(data).referrerCode(_msgSender()) == 0 && referrer != _msgSender()){
-            IData(data).setReferrer(_msgSender(),_code);
-            IData(data).addInvitation(referrer,1);
-        }
-    }
-
-    function _addInvitationCredits() internal{
-        address _address = _msgSender();
-        for(uint256 index = 0; index < invitationCredits.length ; ++index){
-            if(IData(data).referrerCode(_address) > 0){
-                IData(data).addCredit(IData(data).referrerAddress(_address),invitationCredits[index]);
-                _address = IData(data).referrerAddress(_address);
-            }else{
-                break;
-            }
-        }
-    }
-
-    function setReferrer(uint256 _code) public {
-        _setReferrer(_code);
+        emit SetScoreBase(_value);
     }
 
     function setNftAddress(address newNFTAddress) public onlyOwner{
-        propsNft = newNFTAddress;
+        basicNft = newNFTAddress;
+
+        emit SetNftAddress(newNFTAddress);
     }
 
-    function getNftAddress() public view returns(address){
-        return propsNft;
-    }
-
-    function setIntervalTime(uint256 newTime) public onlyGameDao{
+    function setIntervalTime(uint256 newTime) public onlyOwner{
         INTERVAL_TIME = newTime;
-    }
-
-    function getIntervalTime() public view returns(uint256){
-        return INTERVAL_TIME;
+        emit SetIntervalTime(newTime);
     }
 
     function setSignerAddress(address newAddress) public onlyOwner {
         signerAddress = newAddress;
+        emit SetSignerAddress(newAddress);
     }
 
-    function getSignerAddress() public view returns(address){
-        return signerAddress;
+    function submit(bytes32 _hashedMessage,bytes memory _signature, uint256 _score) public whenNotPaused{
+
+        require(_score >0 ,"error: Score needs to be greater than 0");
+        require(ECDSA.VerifyMessage(_hashedMessage,_signature,signerAddress), "error: Invalid signature");
+        require(signerBytesMap[_hashedMessage] == false ,"error: Signature used");
+        require(block.timestamp.sub(userInfoMap[_msgSender()].lasttime) >= INTERVAL_TIME,"error: Insufficient interval time");
+
+        if(userInfoMap[_msgSender()].issubmit){
+             userInfoMap[_msgSender()].count = userInfoMap[_msgSender()].count.add(1);
+             userInfoMap[_msgSender()].lasttime = block.timestamp;
+        }else{
+            userInfoMap[_msgSender()] = userInfo({
+                count : 1,
+                lasttime : block.timestamp,
+                lastTokenID : 0,
+                lastIsNft : false,
+                issubmit : true
+            });
+        }
+
+        uint256 randomNum = random(100);
+
+        uint256 percentNum = BASE_PERCENT;
+        for(uint index = 0; index < badges.length ; index++){
+            uint nftAmount = IERC721(badges[index]).balanceOf(_msgSender());
+            if( nftAmount > 0){
+                percentNum = percentNum.add(badgePercent[badges[index]].mul(nftAmount));
+            }
+        }
+        
+        if(randomNum.add(1) <= percentNum && _score >= scoreBase){
+            uint256 tokenID = random(tokenIDLimit).add(1);
+            IERC1155(basicNft).mint(_msgSender(),tokenID,1,'0x0');
+
+            userInfoMap[_msgSender()].lastIsNft = true;
+            userInfoMap[_msgSender()].lastTokenID = tokenID;
+
+            emit AwardNFT(_msgSender(),tokenID,block.timestamp);
+        }else{
+            userInfoMap[_msgSender()].lastIsNft = false;
+            userInfoMap[_msgSender()].lastTokenID = 0;
+        }
+
+        emit Submit(_msgSender(),_score,block.timestamp);
+        IData(data).addExp(_msgSender(), _score);
     }
 
-    function setLevelLimit(uint256 newLevel) public onlyOwner{
-        levelLimit = newLevel;
+    function getPercentageOfNFT(address _account) public view returns (uint256){
+        uint256 percentNum = BASE_PERCENT;
+        for(uint index = 0; index < badges.length ; index++){
+            uint nftAmount = IERC721(badges[index]).balanceOf(_account);
+            if( nftAmount > 0){
+                percentNum = percentNum.add(badgePercent[badges[index]].mul(nftAmount));
+            }
+        }
+        return  percentNum > 100 ? 100 : percentNum;
     }
 
-    function getLevelLimit() public view returns(uint256){
-        return levelLimit;
-    }
-
-    function submit(bytes32 _hashedMessage,bytes memory _signature, uint256 _score, uint256 code) public whenNotPaused{
-        ////
+    function random(uint number) internal view returns(uint256) {
+        return uint256(keccak256(abi.encodePacked(block.timestamp,
+        block.number,
+        block.gaslimit,
+        _msgSender()))) % number;
     }
 
 }

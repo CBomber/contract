@@ -95,8 +95,10 @@ interface IERC1155 {
     function safeTransferFrom(address from, address to, uint256 id, uint256 amount, bytes calldata data) external;
 }
 
-interface  IPoolAdmin {
-    function sendGas(uint256 value) external;
+interface IERC721 {
+    function ownerOf(uint256 tokenId) external view returns (address);
+    function isApprovedForAll(address account, address operator) external view returns (bool);
+    function safeTransferFrom(address from, address to, uint256 tokenId, bytes memory data) external;
 }
 
 interface IERC165 {
@@ -159,19 +161,18 @@ contract CBomberMarket is Ownable,ERC1155Holder{
     using SafeMath for uint256;
 
     uint256 public constant PERCENTS_DIVIDER = 1000;
-    uint256 public constant DEV_FUND_PERCENT = 20;
-    uint256 public constant POOL_FUND_PERCENT = 20;
+    uint256 public constant DEV_FUND_PERCENT = 50;
 
-    address private paymentToken;
-    address private devFundAddress;
+    address public paymentToken;
+    address public devFundAddress;
 
-    struct Total{
-        uint256 token;
-        uint256 eth;
+    struct NFTInfo{
+        bool isERC1155;
+        bool state;
     }
-    mapping(address => bool) private nftContractList;
+
+    mapping(address => NFTInfo) private nftContractList;
     mapping(address => mapping(uint256 => uint256)) balances;
-    mapping(address => Total) salesAmountList;
     mapping(address => uint256[]) accountSalesList;
     mapping(address => uint256[]) accountSoldsList;
     mapping (uint256 => Order) private NFTSalesOrder;
@@ -192,7 +193,9 @@ contract CBomberMarket is Ownable,ERC1155Holder{
         uint256 minPrice;
         address onlySellTo;
     }
-
+    event AddNFTContract(address _nft,bool _isERC1155);
+    event RemoveNFTContract(address _nft);
+    event SetDevFundAddress(address _account);
     event SellNFT(uint256 _id,address _nftAddress,uint256 _tokenid,uint _number, uint256 _minSalePriceInWei,bool _isToken,address _onlySellTo,uint256 time);
     event CancelSalesOrder(uint256 _index,address seller,uint256 time);
     event BuyNFT(uint256 _index,address account,uint256 time);
@@ -215,39 +218,99 @@ contract CBomberMarket is Ownable,ERC1155Holder{
         _indexToAssign ++;
     }
 
-    function getPaymentToken() public view returns(address){
-        return paymentToken;
-    }
-
-    function setPaymentToken(address _address) public onlyOwner{
-        paymentToken = _address;
-    }
-
-    function addNFTContract(address _nftAddress) public onlyOwner {
-        nftContractList[_nftAddress] = true;
+    function addNFTContract(address _nftAddress,bool _isERC1155) public onlyOwner {
+        nftContractList[_nftAddress].isERC1155 = _isERC1155;
+        nftContractList[_nftAddress].state = true;
+        emit AddNFTContract(_nftAddress,_isERC1155);
     }
 
     function removeNFTContract(address _nftAddress) public onlyOwner{
-        nftContractList[_nftAddress] = false;
+        nftContractList[_nftAddress].state = false;
+        emit RemoveNFTContract(_nftAddress);
     }
 
     function setDevFundAddress(address _address) public onlyOwner{
         devFundAddress = _address;
+        emit SetDevFundAddress(_address);
     }
-
-    function getDevFundAddress() public view returns(address){
-        return devFundAddress;
-    }
-
     
     function sellNFT(address _nftAddress,uint256 _tokenid,uint _number, uint256 _minSalePriceInWei,bool _isToken,address _onlySellTo) public {
 
-        ////
+        require(nftContractList[_nftAddress].state == true,"error: Unsupported nft addresses");
+
+        uint256 _index = _getNextIndexToAssign();
+
+        if(nftContractList[_nftAddress].isERC1155){
+
+            IERC1155 _1155NFT = IERC1155(_nftAddress);
+
+            require(_1155NFT.balanceOf(_msgSender(),_tokenid) >= _number,"error: Wallet nft low balance");
+            require(_1155NFT.isApprovedForAll(_msgSender(),address(this)),"error: nft not approved");
+
+            NFTSalesOrder[_index] = Order(_index,true,_nftAddress,_tokenid,_number,_msgSender(),_isToken,_minSalePriceInWei,_onlySellTo);
+
+            emit SellNFT(_index,_nftAddress,_tokenid,_number,_minSalePriceInWei,_isToken,_onlySellTo,block.timestamp);
+
+            _incrementIndexToAssign();
+            _1155NFT.safeTransferFrom(_msgSender(), address(this), _tokenid, _number, "0x0");
+            balances[_nftAddress][_tokenid] = balances[_nftAddress][_tokenid].add(_number);
+
+        }else{
+
+            IERC721 _721NFT = IERC721(_nftAddress);
+
+            require(_721NFT.ownerOf(_tokenid) == _msgSender() ,"error: The tokenid does not belong to this address.");
+            require(_721NFT.isApprovedForAll(_msgSender(),address(this)),"error: nft not approved");
+
+            NFTSalesOrder[_index] = Order(_index,true,_nftAddress,_tokenid,1,_msgSender(),_isToken,_minSalePriceInWei,_onlySellTo);
+
+            emit SellNFT(_index,_nftAddress,_tokenid,1,_minSalePriceInWei,_isToken,_onlySellTo,block.timestamp);
+
+            _incrementIndexToAssign();
+
+            _721NFT.safeTransferFrom(_msgSender(), address(this), _tokenid, "0x0");
+            balances[_nftAddress][_tokenid] = balances[_nftAddress][_tokenid].add(1);
+
+        }
+
+        accountSalesList[_msgSender()].push(_index);
+        salesList.push(_index);
+
 
     }
    
     function cancelSalesOrder(uint256 _index) public {
-        ////
+
+        require(NFTSalesOrder[_index].isForSale == true,"error: The state of nft is false");
+        require(NFTSalesOrder[_index].seller == _msgSender(),"error: nft does not belong to the requester");
+
+        Order storage _offer = NFTSalesOrder[_index];
+
+        if(nftContractList[_offer.nftAddress].isERC1155){
+            IERC1155(_offer.nftAddress).safeTransferFrom(address(this), _msgSender(), _offer.tokenID, _offer.number, "0x0");
+            balances[_offer.nftAddress][_offer.tokenID] = balances[_offer.nftAddress][_offer.tokenID].sub(_offer.number);
+        }else{
+            IERC721(_offer.nftAddress).safeTransferFrom(address(this), _msgSender(), _offer.tokenID, "0x0");
+            balances[_offer.nftAddress][_offer.tokenID] = 0;
+        }
+        
+        _offer.isForSale = false;
+
+        emit CancelSalesOrder(_index,_msgSender(),block.timestamp);
+
+        uint256[] storage saless = accountSalesList[_msgSender()];
+        for (uint256 i = 0; i < saless.length; i++) {
+            if (saless[i] == _index) {
+                deleteElement(saless,i); 
+                break;
+            }
+        }
+        for (uint256 i = 0; i < salesList.length; i++) {
+            if (salesList[i] == _index) {
+                deleteElement(salesList,i); 
+                break;
+            }
+        }
     }
 
     function deleteElement(uint256[] storage dataArray,uint256 index) internal {
@@ -258,18 +321,56 @@ contract CBomberMarket is Ownable,ERC1155Holder{
 
     function buyNFT(uint256 _index) public payable {
 
-        ////
+        Order storage _offer = NFTSalesOrder[_index];
+        require(NFTSalesOrder[_index].isForSale == true,"error: The state of nft is false");
+        require(_offer.onlySellTo == address(0x0) || (_offer.onlySellTo != address(0x0) && _offer.onlySellTo == _msgSender()),"error: No order purchase privileges");
 
-    }
+        uint256 operatingAmount = _offer.minPrice.mul(DEV_FUND_PERCENT).div(PERCENTS_DIVIDER);
+        uint256 sellerAmount = _offer.minPrice.sub(operatingAmount);
+        
+        if(_offer.isToken){
+            
+            require(IERC20(paymentToken).allowance(_msgSender(),address(this)) >= _offer.minPrice && IERC20(paymentToken).balanceOf(_msgSender()) >= _offer.minPrice,"error: Unapproved token or insufficient quota");
+            IERC20(paymentToken).transferFrom(_msgSender(), devFundAddress, operatingAmount);
+            IERC20(paymentToken).transferFrom(_msgSender(), _offer.seller, sellerAmount);
 
-    function withdraw() public{
-        ////
+        }else{
+            require(_msgValue() >= _offer.minPrice,"error: Insufficient payment eth");
+            (bool seller, ) = _offer.seller.call{value: sellerAmount}("");require(seller);
+            (bool dev, ) = devFundAddress.call{value: _msgValue().sub(sellerAmount)}("");require(dev);
 
-        emit Withdraw(_msgSender(),_total.eth,_total.token,block.timestamp);
-    }
+        }
 
-    function getUserSalesAmount(address _account) public view returns(Total memory){
-        return salesAmountList[_account];
+        if(nftContractList[_offer.nftAddress].isERC1155){
+            balances[_offer.nftAddress][_offer.tokenID] = balances[_offer.nftAddress][_offer.tokenID].sub(_offer.number);
+            IERC1155(_offer.nftAddress).safeTransferFrom(address(this), _msgSender(), _offer.tokenID, _offer.number, "0x0");
+        }else{
+            balances[_offer.nftAddress][_offer.tokenID] = 0;
+            IERC721(_offer.nftAddress).safeTransferFrom(address(this), _msgSender(), _offer.tokenID, "0x0");
+        }
+        
+        _offer.isForSale = false;
+        uint256[] storage saless = accountSalesList[_offer.seller];
+
+        for (uint256 i = 0; i < saless.length; i++) {
+            if (saless[i] == _index) {
+                deleteElement(saless,i);
+                break;
+            }
+        }
+        for (uint256 i = 0; i < salesList.length; i++) {
+            if (salesList[i] == _index) {
+                deleteElement(salesList,i);
+                break;
+            }
+        }
+
+        uint256[] storage solds = accountSoldsList[_offer.seller];
+        solds.push(_index);
+        soldsList.push(_index);
+
+        emit BuyNFT(_index,_msgSender(),block.timestamp);
+
     }
 
     function getAccountSalesIndex(address _account) public view returns(uint256[] memory){
