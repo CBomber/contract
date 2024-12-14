@@ -156,7 +156,24 @@ abstract contract ERC1155Holder is ERC165, IERC1155Receiver {
     }
 }
 
-contract CBomberMarket is Ownable,ERC1155Holder{
+interface IERC721Receiver {
+ 
+    function onERC721Received(
+        address operator,
+        address from,
+        uint256 tokenId,
+        bytes calldata data
+    ) external returns (bytes4);
+}
+
+abstract contract ERC721Holder is IERC721Receiver {
+    
+    function onERC721Received(address, address, uint256, bytes memory) public virtual returns (bytes4) {
+        return this.onERC721Received.selector;
+    }
+}
+
+contract CBomberMarket is Ownable,ERC1155Holder,ERC721Holder{
 
     using SafeMath for uint256;
 
