@@ -123,7 +123,7 @@ contract CBomberShop is Ownable{
     event AddProduct(uint256 _id,uint256 _tokenId,address _nftAddress,uint256 _total,uint256 _price,bool _isToken);
     event UpdateProduct(uint256 _id,uint256 _tokenId,address _nftAddress,uint256 _total,uint256 _price,bool _isToken);
     event SetPaymentTokenAddress(address _address);
-    event Buy(address _account,address _nft,uint256 _tokenID);
+    event Buy(address _account,address _nft,uint256 _tokenID,uint256 _productId);
     event SetProductState(uint256 _id,bool _state);
 
     constructor (address _token,address _devFundAddress) {
@@ -215,7 +215,7 @@ contract CBomberShop is Ownable{
             require(IERC20(paymentToken).balanceOf(_msgSender()) >= productList[_id].price,"error: Insufficient token balance");
 
             IERC20(paymentToken).transferFrom(_msgSender(), devFundAddress, productList[_id].price);
-            
+
         }else{
             require(_msgValue() >= productList[_id].price,"error: Insufficient payment eth");
             
@@ -225,7 +225,7 @@ contract CBomberShop is Ownable{
 
         IERC1155(productList[_id].nftAddress).mint(_msgSender(),productList[_id].tokenId,1,'0x0');
 
-        emit Buy(_msgSender(),productList[_id].nftAddress,productList[_id].tokenId);
+        emit Buy(_msgSender(),productList[_id].nftAddress,productList[_id].tokenId,_id);
     }
 
 }
