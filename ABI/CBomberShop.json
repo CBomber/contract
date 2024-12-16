@@ -78,6 +78,12 @@
 				"internalType": "uint256",
 				"name": "_tokenID",
 				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "_productId",
+				"type": "uint256"
 			}
 		],
 		"name": "Buy",
