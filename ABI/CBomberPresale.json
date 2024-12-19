@@ -15,6 +15,11 @@
 				"internalType": "address",
 				"name": "_nft",
 				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_stopTime",
+				"type": "uint256"
 			}
 		],
 		"stateMutability": "nonpayable",
@@ -101,6 +106,19 @@
 		],
 		"name": "OwnershipTransferred",
 		"type": "event"
+	},
+	{
+		"inputs": [],
+		"name": "ABANDONMENT_ADDRESS",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
 	},
 	{
 		"inputs": [],
@@ -235,6 +253,19 @@
 	{
 		"inputs": [],
 		"name": "SINGLE_FEE",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "STOP_PRESALE_TIME",
 		"outputs": [
 			{
 				"internalType": "uint256",
@@ -434,6 +465,13 @@
 			}
 		],
 		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "presaleSettlement",
+		"outputs": [],
+		"stateMutability": "nonpayable",
 		"type": "function"
 	},
 	{
