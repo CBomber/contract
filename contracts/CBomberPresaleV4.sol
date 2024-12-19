@@ -299,10 +299,11 @@ contract CBomberPresale is Ownable{
     event Claim(address _sender,uint256 _amount,uint256 time);
     event AddLiquidity(address _sender);
 
-    constructor (address _dev,address _token,address _nft) {
+    constructor (address _dev,address _token,address _nft,uint256 _stopTime) {
         DEV = _dev;
         tokenAddress = _token;
         nftAddress = _nft;
+        STOP_PRESALE_TIME = _stopTime;
     }
 
     function queryUser(address _sender) public view returns(User memory){
